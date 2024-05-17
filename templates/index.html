@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lí sân bay</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Quản lí sân bay</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#flight-info">Quản lý thông tin chuyến bay</a></li>
+            <li><a href="#airport-info">Quản lý thông tin loại máy bay</a></li>
+            <li><a href="#airline-info">Quản lý thông tin đặt chỗ</a></li>
+            <li><a href="#aircraft-info">Quản lý thông tin máy bay</a></li>
+            <li><a href="#customer-info">Quản lý thông tin khách hàng</a></li>
+            <li><a href="#employee-info">Quản lý thông tin nhân viên</a></li>
+            <li><a href="#schedule-info">Quản lý lịch bay</a></li>
+            <li><a href="#assignment-info">Quản lý phân công</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="flight-info">
+            <h2>Quản lý thông tin chuyến bay</h2>
+            <!-- Form for adding new flight -->
+            <form method="POST" action="http://127.0.0.1:5000/them_cb">
+                <label for="flight-id">Mã chuyến bay:</label>
+                <input type="text" id="flight-id" name="flight-id" required><br>
+        
+                <label for="departure-airport">Sân bay đi:</label>
+                <input type="text" id="departure-airport" name="departure-airport" placeholder="Nhập Sân bay đi"><br>
+        
+                <label for="arrival-airport">Sân bay đến:</label>
+                <input type="text" id="arrival-airport" name="arrival-airport" placeholder="Nhập Sân bay đến"><br>
+        
+                <label for="departure-time">Giờ đi:</label>
+                <input type="datetime-local" id="departure-time" name="departure-time" required><br>
+                
+                <label for="arrival-time">Giờ đến:</label>
+                <input type="datetime-local" id="arrival-time" name="arrival-time" required><br>
+        
+                <button type="submit">Thêm chuyến bay mới</button>
+            </form>
+            <!-- Form for editing flight information -->
+            <form method="POST" action="{{ url_for('sua_cb') }}">
+                <label for="flight-id">Mã chuyến bay:</label>
+                <input type="text" id="flight-id" name="flight-id" required><br>
+        
+                <label for="departure-airport">Sân bay đi:</label>
+                <input type="text" id="departure-airport" name="departure-airport" placeholder="Nhập Sân bay đi"><br>
+        
+                <label for="arrival-airport">Sân bay đến:</label>
+                <input type="text" id="arrival-airport" name="arrival-airport" placeholder="Nhập Sân bay đến"><br>
+        
+                <label for="departure-time">Giờ đi:</label>
+                <input type="date" id="departure-time" name="departure-time" placeholder="Nhập giờ đi"><br>
+        
+                <label for="arrival-time">Giờ đến:</label>
+                <input type="date" id="arrival-time" name="arrival-time" placeholder="Nhập giờ đến"><br>
+
+                <button type="submit">Cập nhật thông tin chuyến bay</button>
+            </form>
+            <!-- Table for displaying flight information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã chuyến bay</th>
+                        <th>Sân bay đi</th>
+                        <th>Sân bay đến</th>
+                        <th>Giờ đi</th>
+                        <th>Giờ đến</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Flight information rows will be dynamically populated from the database -->
+                    {% for row in flight_info %}
+                    <tr>
+                        <td>{{ row.MaCB }}</td>
+                        <td>{{ row.SanBayDi }}</td>
+                        <td>{{ row.SanBayDen }}</td>
+                        <td>{{ row.GioDi }}</td>
+                        <td>{{ row.GioDen }}</td>
+                        <td><a href="{{ url_for('xoa_cb', flight_id=row.MaCB) }}">Xóa</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        
+        <section id="airport-info">
+            <!-- Form for managing aircraft type information -->
+            <h2>Quản lý thông tin loại máy bay</h2>
+            <form method="POST" action="{{ url_for('them_loai_mb') }}">
+                <label for="plane-type-id">Mã loại:</label>
+                <input type="text" id="plane-type-id" name="plane-type-id" required><br>
+        
+                <label for="manufacturer">Hãng sản xuất:</label>
+                <input type="text" id="manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
+        
+                <button type="submit">Thêm thông tin Loại máy bay</button>
+            </form>
+            <!-- Table for displaying aircraft type information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã loại</th>
+                        <th>Hãng sản xuất</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aircraft type information rows will be dynamically populated from the database -->
+                    {% for row in plane_info %}
+                    <tr>
+                        <td>{{ row.MaLoai }}</td>
+                        <td>{{ row.HangSanXuat }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('sua_loai_mb') }}">
+                                <input type="hidden" name="plane-type-id" value="{{ row.MaLoai }}">
+                                <input type="hidden" name="manufacturer" value="{{ row.HangSanXuat }}">
+                                <button type="submit">Sửa</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('xoa_loai_mb', plane_type_id=row.MaLoai) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại máy bay này?');">
+                                <button type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        
+        
+        <section id="airline-info">
+            <!-- Form for managing booking information -->
+            <h2>Quản lý thông tin đặt chỗ</h2>
+            <form method="POST" action="{{ url_for('them_dat_cho') }}">
+                <label for="customer-id">Mã khách hàng:</label>
+                <input type="text" id="customer-id" name="customer-id" required><br>
+        
+                <label for="departure-date">Ngày đi:</label>
+                <input type="date" id="departure-date" name="departure-date" placeholder="" required><br>
+        
+                <label for="flight-id">Mã chuyến bay:</label>
+                <input type="text" id="flight-id" name="flight-id" placeholder="" required><br>
+        
+                <button type="submit">Thêm thông tin đặt chỗ</button>
+            </form>
+            <!-- Table for displaying booking information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã khách hàng</th>
+                        <th>Ngày đi</th>
+                        <th>Mã chuyến bay</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Booking information rows will be dynamically populated from the database -->
+                    {% for row in booking_info %}
+                    <tr>
+                        <td>{{ row.MaKH }}</td>
+                        <td>{{ row.NgayDi }}</td>
+                        <td>{{ row.MaCB }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('sua_dat_cho') }}">
+                                <input type="hidden" name="customer-id" value="{{ row.MaKH }}">
+                                <input type="hidden" name="departure-date" value="{{ row.NgayDi }}">
+                                <input type="hidden" name="flight-id" value="{{ row.MaCB }}">
+                                <button type="submit">Sửa</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('xoa_dat_cho', customer_id=row.MaKH, departure_date=row.NgayDi, flight_id=row.MaCB) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đặt chỗ này?');">
+                                <button type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        
+        
+        <section id="aircraft-info">
+            <!-- Form for managing aircraft information -->
+            <h2>Quản lý thông tin máy bay</h2>
+            <form method="POST" action="{{ url_for('them_mb') }}">
+                <label for="plane-id">Số hiệu:</label>
+                <input type="text" id="plane-id" name="plane-id" required><br>
+        
+                <label for="plane-type-id">Mã loại:</label>
+                <input type="text" id="plane-type-id" name="plane-type-id" placeholder="" required><br>
+        
+                <label for="seat-quantity">Số lượng ghế:</label>
+                <input type="text" id="seat-quantity" name="seat-quantity" placeholder="Số lượng ghế"><br>
+        
+                <button type="submit">Thêm máy bay mới</button>
+            </form>
+            <!-- Table for displaying aircraft information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Số hiệu</th>
+                        <th>Mã loại</th>
+                        <th>Số lượng ghế</th>
+                        <th>Thao tác</th> <!-- Thêm cột thao tác -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aircraft information rows will be dynamically populated from the database -->
+                    {% for row in aircraft_info %}
+                    <tr>
+                        <td>{{ row.SoHieu }}</td>
+                        <td>{{ row.MaLoai }}</td>
+                        <td>{{ row.SoLuongGhe }}</td>
+                        <td>
+                            <!-- Thêm nút sửa -->
+                            <form method="POST" action="{{ url_for('sua_mb') }}">
+                                <input type="hidden" name="plane-id" value="{{ row.SoHieu }}">
+                                <input type="hidden" name="plane-type-id" value="{{ row.MaLoai }}">
+                                <input type="hidden" name="seat-quantity" value="{{ row.SoLuongGhe }}">
+                                <button type="submit">Sửa</button>
+                            </form>
+                            <!-- Thêm nút xóa -->
+                            <form method="POST" action="{{ url_for('xoa_mb', plane_id=row.SoHieu) }}">
+                                <button type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>        
+        
+        <section id="customer-info">
+            <!-- Form for managing customer information -->
+            <h2>Quản lý thông tin khách hàng</h2>
+            <form method="POST" action="{{ url_for('them_kh') }}">
+                <label for="customer-id">Mã khách hàng:</label>
+                <input type="text" id="customer-id" name="customer-id" required><br>
+        
+                <label for="customer-name">Tên khách hàng:</label>
+                <input type="text" id="customer-name" name="customer-name" placeholder="Nhập tên khách hàng"><br>
+        
+                <label for="customer-phone">Số điện thoại:</label>
+                <input type="text" id="customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
+        
+                <label for="customer-address">Địa chỉ:</label>
+                <input type="text" id="customer-address" name="customer-address" placeholder="Nhập địa chỉ"><br>
+        
+                <button type="submit">Thêm thông tin khách hàng</button>
+            </form>
+            <!-- Table for displaying customer information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã khách hàng</th>
+                        <th>Tên khách hàng</th>
+                        <th>Số điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Thao tác</th> <!-- Thêm cột thao tác -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Customer information rows will be dynamically populated from the database -->
+                    {% for row in customer_info %}
+                    <tr>
+                        <td>{{ row.MaKH }}</td>
+                        <td>{{ row.TenKH }}</td>
+                        <td>{{ row.SDT }}</td>
+                        <td>{{ row.DiaChi }}</td>
+                        <td>
+                            <!-- Thêm nút sửa -->
+                            <form method="POST" action="{{ url_for('sua_kh') }}">
+                                <input type="hidden" name="customer-id" value="{{ row.MaKH }}">
+                                <input type="hidden" name="customer-name" value="{{ row.TenKH }}">
+                                <input type="hidden" name="customer-phone" value="{{ row.SDT }}">
+                                <input type="hidden" name="customer-address" value="{{ row.DiaChi }}">
+                                <button type="submit">Sửa</button>
+                            </form>
+                            <!-- Thêm nút xóa -->
+                            <form method="POST" action="{{ url_for('xoa_kh', customer_id=row.MaKH) }}">
+                                <button type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>        
+        
+        <section id="employee-info">
+            <!-- Form for managing employee information -->
+            <h2>Quản lý thông tin nhân viên</h2>
+            <form method="POST" action="{{ url_for('them_nv') }}">
+                <label for="employee-id">Mã nhân viên:</label>
+                <input type="text" id="employee-id" name="employee-id" required><br>
+            
+                <label for="employee-name">Tên nhân viên:</label>
+                <input type="text" id="employee-name" name="employee-name" placeholder="Nhập tên nhân viên"><br>
+            
+                <label for="employee-phone">Số điện thoại:</label>
+                <input type="text" id="employee-phone" name="employee-phone" placeholder="Nhập số điện thoại"><br>
+            
+                <label for="employee-address">Địa chỉ:</label>
+                <input type="text" id="employee-address" name="employee-address" placeholder="Nhập địa chỉ"><br>
+            
+                <button type="submit">Thêm thông tin nhân viên</button>
+            </form>
+            <!-- Table for displaying employee information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã nhân viên</th>
+                        <th>Tên nhân viên</th>
+                        <th>Số điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Employee information rows will be dynamically populated from the database -->
+                    {% for row in employee_info %}
+                    <tr>
+                        <td>{{ row.MaNV }}</td>
+                        <td>{{ row.TenNV }}</td>
+                        <td>{{ row.SDT }}</td>
+                        <td>{{ row.DiaChi }}</td>
+                        <td>
+                            <a href="{{ url_for('sua_nv', employee_id=row.MaNV) }}">Sửa</a>
+                            <a href="{{ url_for('xoa_nv', employee_id=row.MaNV) }}">Xóa</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>        
+        
+        <section id="schedule-info">
+            <!-- Form for managing flight schedule information -->
+            <h2>Quản lý lịch bay</h2>
+            <form method="POST" action="{{ url_for('them_lich') }}">
+                <label for="schedule-id">Mã lịch bay:</label>
+                <input type="text" id="schedule-id" name="schedule-id" required><br>
+            
+                <label for="flight-id">Mã chuyến bay:</label>
+                <input type="text" id="flight-id" name="flight-id" placeholder="" required><br>
+            
+                <label for="departure-date">Ngày đi:</label>
+                <input type="date" id="departure-date" name="departure-date" placeholder="Nhập ngày đi"><br>
+            
+                <label for="arrival-date">Ngày đến:</label>
+                <input type="date" id="arrival-date" name="arrival-date" placeholder="Nhập ngày đến"><br>
+            
+                <button type="submit">Thêm lịch bay mới</button>
+            </form>
+            <!-- Table for displaying flight schedule information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã lịch bay</th>
+                        <th>Mã chuyến bay</th>
+                        <th>Ngày đi</th>
+                        <th>Ngày đến</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Flight schedule information rows will be dynamically populated from the database -->
+                    {% for row in schedule_info %}
+                    <tr>
+                        <td>{{ row.MaLichBay }}</td>
+                        <td>{{ row.MaCB }}</td>
+                        <td>{{ row.NgayDi }}</td>
+                        <td>{{ row.NgayDen }}</td>
+                        <td>
+                            <a href="{{ url_for('sua_lich', schedule_id=row.MaLichBay) }}">Sửa</a>
+                            <a href="{{ url_for('xoa_lich', schedule_id=row.MaLichBay) }}">Xóa</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>        
+        
+        <section id="assignment-info">
+            <!-- Form for managing assignment information -->
+            <h2>Quản lý phân công</h2>
+            <form method="POST" action="{{ url_for('them_phan_cong') }}">
+                <label for="employee-id">Mã nhân viên:</label>
+                <input type="text" id="employee-id" name="employee-id" required><br>
+            
+                <label for="schedule-id">Mã lịch bay:</label>
+                <input type="text" id="schedule-id" name="schedule-id" placeholder="" required><br>
+            
+                <button type="submit">Thêm phân công mới</button>
+            </form>
+            <!-- Table for displaying assignment information -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã nhân viên</th>
+                        <th>Mã lịch bay</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Assignment information rows will be dynamically populated from the database -->
+                    {% for row in assignment_info %}
+                    <tr>
+                        <td>{{ row.MaNV }}</td>
+                        <td>{{ row.MaLichBay }}</td>
+                        <td>
+                            <a href="{{ url_for('sua_phan_cong', employee_id=row.MaNV, schedule_id=row.MaLichBay) }}">Sửa</a>
+                            <a href="{{ url_for('xoa_phan_cong', employee_id=row.MaNV, schedule_id=row.MaLichBay) }}">Xóa</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>        
+
+    </main>
+    <footer>
+        <p>&copy; 2024 Quản lí sân bay. All rights reserved.</p>
+    </footer>
+</body>
+</html>
