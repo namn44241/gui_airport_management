@@ -6,112 +6,166 @@
     <title>Quản lí sân bay</title>
     <link rel="stylesheet" href="">
     <style>
-        body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
+      /* Định dạng cho toàn bộ trang */
+      body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f0f8ff;
+      }
 
-    header {
-        background-color: #333;
-        color: white;
-        padding: 20px;
-        text-align: center;
-    }
+      /* Định dạng cho header */
+      header {
+          background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+          color: white;
+          padding: 20px;
+          text-align: center;
+          border-radius: 0 0 20px 20px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          position: relative;
+      }
 
-    nav ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        background-color: #f1f1f1;
-        overflow: hidden;
-    }
+      header::before, header::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          background: white;
+          opacity: 0.1;
+          pointer-events: none;
+          animation: snow 10s linear infinite;
+      }
 
-    nav ul li {
-        float: left;
-    }
+      header::before {
+          left: 10%;
+      }
 
-    nav ul li a {
-        display: block;
-        padding: 10px 20px;
-        text-decoration: none;
-        color: #333;
-    }
+      header::after {
+          right: 10%;
+          animation-delay: 5s;
+      }
 
-    nav ul li a:hover {
-        background-color: #ddd;
-    }
+      @keyframes snow {
+          0% { transform: translateY(-100px) rotate(0deg); }
+          100% { transform: translateY(100vh) rotate(360deg); }
+      }
 
-    main {
-        padding: 20px;
-    }
+      /* Định dạng cho thanh điều hướng */
+      nav ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+          background-color: #333;
+          overflow: hidden;
+          border-radius: 20px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
 
-    form label {
-        display: block;
-        margin-bottom: 5px;
-    }
+      nav ul li {
+          float: left;
+      }
 
-    form input[type="text"] {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        box-sizing: border-box;
-    }
+      nav ul li a {
+          display: block;
+          padding: 10px 20px;
+          text-decoration: none;
+          color: white;
+          transition: background-color 0.3s, transform 0.3s;
+      }
 
-    form button {
-        padding: 10px 20px;
-        background-color: #333;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
+      nav ul li a:hover {
+          background-color: #555;
+          transform: scale(1.1);
+      }
 
-    form button:hover {
-        background-color: #555;
-    }
+      /* Định dạng cho nội dung chính */
+      main {
+          padding: 20px;
+      }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+      /* Định dạng cho form */
+      form label {
+          display: block;
+          margin-bottom: 5px;
+      }
 
-    table th, table td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
+      form input[type="text"],
+      form input[type="datetime-local"] {
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          box-sizing: border-box;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+      }
 
-    table th {
-        background-color: #f2f2f2;
-    }
-    /* Ẩn các phần nội dung mặc định */
-    main section {
-        display: none;
-    }
+      form button {
+          padding: 10px 20px;
+          background-color: #333;
+          color: white;
+          border: none;
+          cursor: pointer;
+          border-radius: 5px;
+          transition: background-color 0.3s;
+      }
 
-    /* Hiển thị phần nội dung khi được chọn */
-    main section:target {
-        display: block;
-    }
+      form button:hover {
+          background-color: #555;
+      }
 
-    </style>
+      /* Định dạng cho bảng */
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      table th,
+      table td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+      }
+
+      table th {
+          background-color: #f2f2f2;
+      }
+
+      table th {
+          background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+          color: white;
+      }
+
+      /* Ẩn các phần nội dung mặc định */
+      main section {
+          display: none;
+      }
+
+      /* Hiển thị phần nội dung khi được chọn */
+      main section:target {
+          display: block;
+      }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Quản lí sân bay</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="#flight-info">Quản lý thông tin chuyến bay</a></li>
-            <li><a href="#airport-info">Quản lý thông tin loại máy bay</a></li>
-            <li><a href="#airline-info">Quản lý thông tin đặt chỗ</a></li>
-            <li><a href="#aircraft-info">Quản lý thông tin máy bay</a></li>
-            <li><a href="#customer-info">Quản lý thông tin khách hàng</a></li>
-            <li><a href="#employee-info">Quản lý thông tin nhân viên</a></li>
-            <li><a href="#schedule-info">Quản lý lịch bay</a></li>
-            <li><a href="#assignment-info">Quản lý phân công</a></li>
-        </ul>
-    </nav>
+  <header>
+      <h1>Quản lí sân bay</h1>
+  </header>
+  <nav>
+      <ul>
+          <li><a href="#flight-info">Quản lý thông tin chuyến bay</a></li>
+          <li><a href="#airport-info">Quản lý thông tin loại máy bay</a></li>
+          <li><a href="#airline-info">Quản lý thông tin đặt chỗ</a></li>
+          <li><a href="#aircraft-info">Quản lý thông tin máy bay</a></li>
+          <li><a href="#customer-info">Quản lý thông tin khách hàng</a></li>
+          <li><a href="#employee-info">Quản lý thông tin nhân viên</a></li>
+          <li><a href="#schedule-info">Quản lý lịch bay</a></li>
+          <li><a href="#assignment-info">Quản lý phân công</a></li>
+      </ul>
+  </nav>
     <main>
         <section id="flight-info">
             <h2>Quản lý thông tin chuyến bay</h2>
@@ -181,46 +235,46 @@
             <h2>Quản lý thông tin loại máy bay</h2>
             <!-- Form để thêm loại máy bay mới -->
             <form method="POST" action="{{ url_for('them_loai_mb') }}">
-              <label for="plane-type-id">Mã loại:</label>
-              <input type="text" id="plane-type-id" name="plane-type-id" required><br>
-              <label for="manufacturer">Hãng sản xuất:</label>
-              <input type="text" id="manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
-              <button type="submit">Thêm thông tin Loại máy bay</button>
+                <label for="plane-type-id">Mã loại:</label>
+                <input type="text" id="plane-type-id" name="plane-type-id" required><br>
+                <label for="manufacturer">Hãng sản xuất:</label>
+                <input type="text" id="manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
+                <button type="submit">Thêm thông tin Loại máy bay</button>
             </form>
-          
+        
             <!-- Form để sửa thông tin loại máy bay -->
             <form method="POST" action="{{ url_for('sua_loai_mb') }}">
-              <label for="edit-plane-type-id">Mã loại:</label>
-              <input type="text" id="edit-plane-type-id" name="plane-type-id" required><br>
-              <label for="edit-manufacturer">Hãng sản xuất:</label>
-              <input type="text" id="edit-manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
-              <button type="submit">Lưu thay đổi</button>
+                <label for="edit-plane-type-id">Mã loại:</label>
+                <input type="text" id="edit-plane-type-id" name="plane-type-id" required><br>
+                <label for="edit-manufacturer">Hãng sản xuất:</label>
+                <input type="text" id="edit-manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
+                <button type="submit">Lưu thay đổi</button>
             </form>
-          
+        
             <!-- Bảng hiển thị thông tin loại máy bay -->
             <table>
-              <thead>
-                <tr>
-                  <th>Mã loại</th>
-                  <th>Hãng sản xuất</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in aircraft_info %}
-                <tr>
-                  <td>{{ row.MaLoai }}</td>
-                  <td>{{ row.HangSanXuat }}</td>
-                  <td>
-                    <form method="POST" action="{{ url_for('xoa_loai_mb', plane_type_id=row.MaLoai) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại máy bay này?');">
-                      <button type="submit">Xóa</button>
-                    </form>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
+                <thead>
+                    <tr>
+                        <th>Mã loại</th>
+                        <th>Hãng sản xuất</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in aircraft_info %}
+                    <tr>
+                        <td>{{ row['MaLoai'] }}</td>
+                        <td>{{ row['HangSanXuat'] }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('xoa_loai_mb', plane_type_id=row['MaLoai']) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại máy bay này?');">
+                                <button type="submit">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-          </section>
+        </section>        
         
           <script>
                 var flightSelect = document.getElementById('flight-id');
@@ -322,201 +376,235 @@
           </section>
         
         
-        <section id="aircraft-info">
-            <!-- Form for managing aircraft information -->
+          <section id="aircraft-info">
             <h2>Quản lý thông tin máy bay</h2>
             <form method="POST" action="{{ url_for('them_mb') }}">
                 <label for="plane-id">Số hiệu:</label>
                 <input type="text" id="plane-id" name="plane-id" required><br>
-        
                 <label for="plane-type-id">Mã loại:</label>
-                <input type="text" id="plane-type-id" name="plane-type-id" placeholder="" required><br>
-        
+                <input type="text" id="plane-type-id" name="plane-type-id" required><br>
                 <label for="seat-quantity">Số lượng ghế:</label>
-                <input type="text" id="seat-quantity" name="seat-quantity" placeholder="Số lượng ghế"><br>
-        
+                <input type="text" id="seat-quantity" name="seat-quantity" required><br>
                 <button type="submit">Thêm máy bay mới</button>
             </form>
-            <!-- Table for displaying aircraft information -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>Số hiệu</th>
-                        <th>Mã loại</th>
-                        <th>Số lượng ghế</th>
-                        <th>Thao tác</th> <!-- Thêm cột thao tác -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Aircraft information rows will be dynamically populated from the database -->
-                    {% for row in aircraft_info %}
-                    <tr>
-                        <td>{{ row.SoHieu }}</td>
-                        <td>{{ row.MaLoai }}</td>
-                        <td>{{ row.SoLuongGhe }}</td>
-                        <td>
-                            <!-- Thêm nút sửa -->
-                            <form method="POST" action="{{ url_for('sua_mb') }}">
-                                <input type="hidden" name="plane-id" value="{{ row.SoHieu }}">
-                                <input type="hidden" name="plane-type-id" value="{{ row.MaLoai }}">
-                                <input type="hidden" name="seat-quantity" value="{{ row.SoLuongGhe }}">
-                                <button type="submit">Sửa</button>
-                            </form>
-                            <!-- Thêm nút xóa -->
-                            <form method="POST" action="{{ url_for('xoa_mb', plane_id=row.SoHieu) }}">
-                                <button type="submit">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>        
         
-        <section id="customer-info">
-            <!-- Form for managing customer information -->
+            <!-- Form để sửa thông tin máy bay -->
+            <form method="POST" action="{{ url_for('sua_mb') }}">
+                <label for="edit-plane-id">Số hiệu:</label>
+                <input type="text" id="edit-plane-id" name="plane-id" required><br>
+                <label for="edit-plane-type-id">Mã loại:</label>
+                <input type="text" id="edit-plane-type-id" name="plane-type-id" required><br>
+                <label for="edit-seat-quantity">Số lượng ghế:</label>
+                <input type="text" id="edit-seat-quantity" name="seat-quantity" required><br>
+                <button type="submit">Lưu thay đổi</button>
+            </form>
+        
+            <!-- Bảng hiển thị thông tin máy bay -->
+            <table>
+              <thead>
+                <tr>
+                  <th>Số hiệu</th>
+                  <th>Loại máy bay</th>
+                  <th>Số lượng ghế</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for plane in plane_info %}
+                <tr>
+                  <td>{{ plane.SoHieu }}</td>
+                  <td>{{ plane.MaLoai }}</td>
+                  <td>{{ plane.SoGheNgoi }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>            
+        </section>                
+             
+        
+          <section id="customer-info">
             <h2>Quản lý thông tin khách hàng</h2>
             <form method="POST" action="{{ url_for('them_kh') }}">
-                <label for="customer-id">Mã khách hàng:</label>
-                <input type="text" id="customer-id" name="customer-id" required><br>
-        
-                <label for="customer-name">Tên khách hàng:</label>
-                <input type="text" id="customer-name" name="customer-name" placeholder="Nhập tên khách hàng"><br>
-        
-                <label for="customer-phone">Số điện thoại:</label>
-                <input type="text" id="customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
-        
-                <label for="customer-address">Địa chỉ:</label>
-                <input type="text" id="customer-address" name="customer-address" placeholder="Nhập địa chỉ"><br>
-        
-                <button type="submit">Thêm thông tin khách hàng</button>
+              <label for="customer-id">Mã khách hàng:</label>
+              <input type="text" id="customer-id" name="customer-id" required><br>
+              <label for="customer-phone">Số điện thoại:</label>
+              <input type="text" id="customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
+              <label for="customer-last-name">Họ đệm:</label>
+              <input type="text" id="customer-last-name" name="customer-last-name" placeholder="Nhập họ đệm"><br>
+              <label for="customer-first-name">Tên:</label>
+              <input type="text" id="customer-first-name" name="customer-first-name" placeholder="Nhập tên"><br>
+              <label for="customer-address">Địa chỉ:</label>
+              <input type="text" id="customer-address" name="customer-address" placeholder="Nhập địa chỉ"><br>
+              <button type="submit">Thêm thông tin khách hàng</button>
             </form>
-            <!-- Table for displaying customer information -->
+            <form method="POST" action="{{ url_for('sua_kh') }}">
+                <label for="edit-customer-id">Mã khách hàng:</label>
+                <input type="text" id="edit-customer-id" name="customer-id" required><br>
+                <label for="edit-customer-phone">Số điện thoại:</label>
+                <input type="text" id="edit-customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
+                <label for="edit-customer-last-name">Họ đệm:</label>
+                <input type="text" id="edit-customer-last-name" name="customer-last-name" placeholder="Nhập họ đệm"><br>
+                <label for="edit-customer-first-name">Tên:</label>
+                <input type="text" id="edit-customer-first-name" name="customer-first-name" placeholder="Nhập tên"><br>
+                <label for="edit-customer-address">Địa chỉ:</label>
+                <input type="text" id="edit-customer-address" name="customer-address" placeholder="Nhập địa chỉ"><br>
+                <button type="submit">Lưu thay đổi</button>
+              </form>
             <table>
-                <thead>
-                    <tr>
-                        <th>Mã khách hàng</th>
-                        <th>Tên khách hàng</th>
-                        <th>Số điện thoại</th>
-                        <th>Địa chỉ</th>
-                        <th>Thao tác</th> <!-- Thêm cột thao tác -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Customer information rows will be dynamically populated from the database -->
-                    {% for row in customer_info %}
-                    <tr>
-                        <td>{{ row.MaKH }}</td>
-                        <td>{{ row.TenKH }}</td>
-                        <td>{{ row.SDT }}</td>
-                        <td>{{ row.DiaChi }}</td>
-                        <td>
-                            <!-- Thêm nút sửa -->
-                            <form method="POST" action="{{ url_for('sua_kh') }}">
-                                <input type="hidden" name="customer-id" value="{{ row.MaKH }}">
-                                <input type="hidden" name="customer-name" value="{{ row.TenKH }}">
-                                <input type="hidden" name="customer-phone" value="{{ row.SDT }}">
-                                <input type="hidden" name="customer-address" value="{{ row.DiaChi }}">
-                                <button type="submit">Sửa</button>
-                            </form>
-                            <!-- Thêm nút xóa -->
-                            <form method="POST" action="{{ url_for('xoa_kh', customer_id=row.MaKH) }}">
-                                <button type="submit">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+              <thead>
+                <tr>
+                  <th>Mã khách hàng</th>
+                  <th>Số điện thoại</th>
+                  <th>Họ đệm</th>
+                  <th>Tên</th>
+                  <th>Địa chỉ</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in customer_info %}
+                <tr>
+                  <td>{{ row.MaKH }}</td>
+                  <td>{{ row.SDT }}</td>
+                  <td>{{ row.HoDem }}</td>
+                  <td>{{ row.Ten }}</td>
+                  <td>{{ row.DiaChi }}</td>
+                  <td>
+                    <form method="POST" action="{{ url_for('xoa_kh', customer_id=row.MaKH) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">
+                      <button type="submit">Xóa</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
             </table>
-        </section>        
+          </section>        
         
-        <section id="employee-info">
-            <!-- Form for managing employee information -->
+          <section id="employee-info">
             <h2>Quản lý thông tin nhân viên</h2>
             <form method="POST" action="{{ url_for('them_nv') }}">
-                <label for="employee-id">Mã nhân viên:</label>
-                <input type="text" id="employee-id" name="employee-id" required><br>
-            
-                <label for="employee-name">Tên nhân viên:</label>
-                <input type="text" id="employee-name" name="employee-name" placeholder="Nhập tên nhân viên"><br>
-            
-                <label for="employee-phone">Số điện thoại:</label>
-                <input type="text" id="employee-phone" name="employee-phone" placeholder="Nhập số điện thoại"><br>
-            
-                <label for="employee-address">Địa chỉ:</label>
-                <input type="text" id="employee-address" name="employee-address" placeholder="Nhập địa chỉ"><br>
-            
-                <button type="submit">Thêm thông tin nhân viên</button>
+              <label for="employee-id">Mã nhân viên:</label>
+              <input type="text" id="employee-id" name="employee-id" required><br>
+              <label for="employee-last-name">Họ đệm:</label>
+              <input type="text" id="employee-last-name" name="employee-last-name" placeholder="Nhập họ đệm"><br>
+              <label for="employee-first-name">Tên:</label>
+              <input type="text" id="employee-first-name" name="employee-first-name" placeholder="Nhập tên"><br>
+              <label for="employee-phone">Số điện thoại:</label>
+              <input type="text" id="employee-phone" name="employee-phone" placeholder="Nhập số điện thoại"><br>
+              <label for="employee-address">Địa chỉ:</label>
+              <input type="text" id="employee-address" name="employee-address" placeholder="Nhập địa chỉ"><br>
+              <label for="employee-salary">Lương:</label>
+              <input type="text" id="employee-salary" name="employee-salary" placeholder="Nhập lương"><br>
+              <label for="employee-type">Loại nhân viên:</label>
+              <input type="text" id="employee-type" name="employee-type" placeholder="Nhập loại nhân viên"><br>
+              <button type="submit">Thêm thông tin nhân viên</button>
             </form>
-            <!-- Table for displaying employee information -->
+
             <table>
-                <thead>
-                    <tr>
-                        <th>Mã nhân viên</th>
-                        <th>Tên nhân viên</th>
-                        <th>Số điện thoại</th>
-                        <th>Địa chỉ</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Employee information rows will be dynamically populated from the database -->
-                    {% for row in employee_info %}
-                    <tr>
-                        <td>{{ row.MaNV }}</td>
-                        <td>{{ row.TenNV }}</td>
-                        <td>{{ row.SDT }}</td>
-                        <td>{{ row.DiaChi }}</td>
-                        <td>
-                            <a href="{{ url_for('sua_nv', employee_id=row.MaNV) }}">Sửa</a>
-                            <a href="{{ url_for('xoa_nv', employee_id=row.MaNV) }}">Xóa</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+              <thead>
+                <tr>
+                  <th>Mã nhân viên</th>
+                  <th>Họ đệm</th>
+                  <th>Tên</th>
+                  <th>Số điện thoại</th>
+                  <th>Địa chỉ</th>
+                  <th>Lương</th>
+                  <th>Loại nhân viên</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in employee_info %}
+                <tr>
+                  <td>{{ row.MaNV }}</td>
+                  <td>{{ row.HoDem }}</td>
+                  <td>{{ row.Ten }}</td>
+                  <td>{{ row.SDT }}</td>
+                  <td>{{ row.DiaChi }}</td>
+                  <td>{{ row.Luong }}</td>
+                  <td>{{ row.LoaiNV }}</td>
+                  <td>
+                    <form method="POST" action="{{ url_for('xoa_nv', employee_id=row.MaNV) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
+                      <button type="submit">Xóa</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('sua_nv', employee_id=row.MaNV) }}">
+                        <input type="hidden" name="employee-id" value="{{ row.MaNV }}">
+                        <label for="edit-employee-last-name">Họ đệm:</label>
+                        <input type="text" id="edit-employee-last-name" name="employee-last-name" value="{{ row.HoDem }}" required><br>
+                        <label for="edit-employee-first-name">Tên:</label>
+                        <input type="text" id="edit-employee-first-name" name="employee-first-name" value="{{ row.Ten }}" required><br>
+                        <label for="edit-employee-phone">Số điện thoại:</label>
+                        <input type="text" id="edit-employee-phone" name="employee-phone" value="{{ row.SDT }}" required><br>
+                        <label for="edit-employee-address">Địa chỉ:</label>
+                        <input type="text" id="edit-employee-address" name="employee-address" value="{{ row.DiaChi }}" required><br>
+                        <label for="edit-employee-salary">Lương:</label>
+                        <input type="text" id="edit-employee-salary" name="employee-salary" value="{{ row.Luong }}" required><br>
+                        <label for="edit-employee-type">Loại nhân viên:</label>
+                        <input type="text" id="edit-employee-type" name="employee-type" value="{{ row.LoaiNV }}" required><br>
+                        <button type="submit">Lưu thay đổi</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
             </table>
-        </section>        
+          </section>        
         
-        <section id="schedule-info">
+          <section id="schedule-info">
             <!-- Form for managing flight schedule information -->
             <h2>Quản lý lịch bay</h2>
             <form method="POST" action="{{ url_for('them_lich') }}">
-                <label for="schedule-id">Mã lịch bay:</label>
-                <input type="text" id="schedule-id" name="schedule-id" required><br>
-            
                 <label for="flight-id">Mã chuyến bay:</label>
                 <input type="text" id="flight-id" name="flight-id" placeholder="" required><br>
-            
+                <label for="aircraft-id">Số hiệu máy bay:</label>
+                <input type="text" id="aircraft-id" name="aircraft-id" placeholder="" required><br>
+                <label for="aircraft-type-id">Mã loại máy bay:</label>
+                <input type="text" id="aircraft-type-id" name="aircraft-type-id" placeholder="" required><br>
                 <label for="departure-date">Ngày đi:</label>
-                <input type="date" id="departure-date" name="departure-date" placeholder="Nhập ngày đi"><br>
-            
-                <label for="arrival-date">Ngày đến:</label>
-                <input type="date" id="arrival-date" name="arrival-date" placeholder="Nhập ngày đến"><br>
-            
+                <input type="date" id="departure-date" name="departure-date" placeholder="Nhập ngày đi" required><br>
                 <button type="submit">Thêm lịch bay mới</button>
             </form>
+        
             <!-- Table for displaying flight schedule information -->
             <table>
                 <thead>
                     <tr>
-                        <th>Mã lịch bay</th>
-                        <th>Mã chuyến bay</th>
                         <th>Ngày đi</th>
-                        <th>Ngày đến</th>
+                        <th>Mã chuyến bay</th>
+                        <th>Số hiệu máy bay</th>
+                        <th>Mã loại máy bay</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Flight schedule information rows will be dynamically populated from the database -->
-                    {% for row in schedule_info %}
+                    {% for schedule_row in schedule_info %}
                     <tr>
-                        <td>{{ row.MaLichBay }}</td>
-                        <td>{{ row.MaCB }}</td>
-                        <td>{{ row.NgayDi }}</td>
-                        <td>{{ row.NgayDen }}</td>
+                        <td>{{ schedule_row.NgayDi }}</td>
+                        <td>{{ schedule_row.MaChuyenBay }}</td>
+                        <td>{{ schedule_row.SoHieu }}</td>
+                        <td>{{ schedule_row.MaLoai }}</td>
                         <td>
-                            <a href="{{ url_for('sua_lich', schedule_id=row.MaLichBay) }}">Sửa</a>
-                            <a href="{{ url_for('xoa_lich', schedule_id=row.MaLichBay) }}">Xóa</a>
+                            <!-- Form để sửa thông tin lịch bay -->
+                            <form method="POST" action="{{ url_for('sua_lich') }}">
+                                <input type="hidden" name="schedule-id" value="{{ schedule_row.MaChuyenBay }}">
+                                <label for="edit-flight-id">Mã chuyến bay:</label>
+                                <input type="text" id="edit-flight-id" name="flight-id" value="{{ schedule_row.SoHieu }}" required><br>
+                                <label for="edit-aircraft-id">Số hiệu máy bay:</label>
+                                <input type="text" id="edit-aircraft-id" name="aircraft-id" value="{{ schedule_row.MaLoai }}" required><br>
+                                <label for="edit-aircraft-type-id">Mã loại máy bay:</label>
+                                <input type="text" id="edit-aircraft-type-id" name="aircraft-type-id" value="{{ schedule_row.NgayDi }}" required><br>
+                                <label for="edit-departure-date">Ngày đi:</label>
+                                <input type="date" id="edit-departure-date" name="departure-date" value="{{ schedule_row.NgayDi }}" required><br>
+                                <button type="submit">Lưu thay đổi</button>
+                            </form>
+        
+                            <!-- Form để xóa lịch bay -->
+                            <form method="POST" action="{{ url_for('xoa_lich') }}">
+                              <input type="hidden" name="flight-id" value="{{ schedule_row.MaChuyenBay }}"> <!-- Add this line -->
+                              <input type="hidden" name="schedule-id" value="{{ schedule_row.MaLichBay }}">
+                              <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa lịch bay này?');">Xóa</button>
+                          </form>
+                                               
+
                         </td>
                     </tr>
                     {% endfor %}
@@ -525,41 +613,76 @@
         </section>        
         
         <section id="assignment-info">
-            <!-- Form for managing assignment information -->
-            <h2>Quản lý phân công</h2>
-            <form method="POST" action="{{ url_for('them_phan_cong') }}">
-                <label for="employee-id">Mã nhân viên:</label>
-                <input type="text" id="employee-id" name="employee-id" required><br>
-            
-                <label for="schedule-id">Mã lịch bay:</label>
-                <input type="text" id="schedule-id" name="schedule-id" placeholder="" required><br>
-            
-                <button type="submit">Thêm phân công mới</button>
-            </form>
-            <!-- Table for displaying assignment information -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mã nhân viên</th>
-                        <th>Mã lịch bay</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Assignment information rows will be dynamically populated from the database -->
-                    {% for row in assignment_info %}
-                    <tr>
-                        <td>{{ row.MaNV }}</td>
-                        <td>{{ row.MaLichBay }}</td>
-                        <td>
-                            <a href="{{ url_for('sua_phan_cong', employee_id=row.MaNV, schedule_id=row.MaLichBay) }}">Sửa</a>
-                            <a href="{{ url_for('xoa_phan_cong', employee_id=row.MaNV, schedule_id=row.MaLichBay) }}">Xóa</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>        
+          <h2>Quản lý phân công</h2>
+          <form method="POST" action="{{ url_for('them_phan_cong') }}">
+              <label for="customer-id">Mã khách hàng:</label>
+              <select id="customer-id" name="customer-id" required>
+                  {% for customer in customer_info %}
+                      <option value="{{ customer.MaKH }}">{{ customer.MaKH }} - {{ customer.HoDem }} {{ customer.Ten }}</option>
+                  {% endfor %}
+              </select><br>
+              <label for="new-departure-date">Ngày đi:</label>
+              <input type="date" id="departure-date" name="departure-date" value="{{ assignment_info.NgayDi }}" required><br>
+              <label for="schedule-id">Mã lịch bay:</label>
+              <select id="schedule-id" name="schedule-id" required>
+                  {% for flight in flight_info %}
+                      <option value="{{ flight.MaChuyenBay }}">{{ flight.MaChuyenBay }} - {{ flight.TenSanBayDi }} - {{ flight.TenSanBayDen }}</option>
+                  {% endfor %}
+              </select><br>
+   
+              <button type="submit">Thêm phân công mới</button>
+          </form>
+
+          <form method="POST" action="{{ url_for('sua_phan_cong', customer_id=assignment_info.MaKH, departure_date=assignment_info.NgayDi, flight_id=assignment_info.MaChuyenBay) }}">
+            <label for="new-customer-id">Mã khách hàng:</label>
+            <select id="new-customer-id" name="new-customer-id" required>
+                {% for customer in customer_info %}
+                    <option value="{{ customer.MaKH }}" {% if customer.MaKH == assignment_info.MaKH %}selected{% endif %}>{{ customer.MaKH }} - {{ customer.HoDem }} {{ customer.Ten }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="new-departure-date">Ngày đi:</label>
+            <input type="date" id="new-departure-date" name="new-departure-date" value="{{ assignment_info.NgayDi }}" required><br>
+
+            <label for="new-flight-id">Mã chuyến bay:</label>
+            <select id="new-flight-id" name="new-flight-id" required>
+                {% for flight in flight_info %}
+                    <option value="{{ flight.MaChuyenBay }}" {% if flight.MaChuyenBay == assignment_info.MaChuyenBay %}selected{% endif %}>{{ flight.MaChuyenBay }} - {{ flight.TenSanBayDi }} - {{ flight.TenSanBayDen }}</option>
+                {% endfor %}
+            </select><br>
+
+            <button type="submit">Lưu thay đổi</button>
+        </form>
+   
+          <!-- Bảng hiển thị thông tin phân công -->
+          <table>
+              <thead>
+                  <tr>
+                      <th>Mã khách hàng</th>
+                      <th>Ngày đi</th>
+                      <th>Mã chuyến bay</th>
+                      <th>Thao tác</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for row in booking_info %}
+                  <tr>
+                      <td>{{ row.MaKH }}</td>
+                      <td>{{ row.NgayDi }}</td>
+                      <td>{{ row.MaChuyenBay }}</td>
+                      <td>
+                          <form method="POST" action="{{ url_for('xoa_phan_cong', customer_id=row.MaKH, departure_date=row.NgayDi, flight_id=row.MaChuyenBay) }}">
+                              <input type="hidden" name="customer-id" value="{{ row.MaKH }}">
+                              <input type="hidden" name="departure-date" value="{{ row.NgayDi }}">
+                              <input type="hidden" name="flight-id" value="{{ row.MaChuyenBay }}">
+                              <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa phân công này?');">Xóa</button>
+                          </form>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </section>        
 
     </main>
     <footer>

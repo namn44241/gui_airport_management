@@ -29,6 +29,8 @@ def index():
     employee_info = []
     schedule_info = []
     assignment_info = []
+    customer_list = []
+    flight_list = []
 
     # Lấy danh sách chuyến bay từ cơ sở dữ liệu
     query = "SELECT MaChuyenBay, TenSanBayDi, TenSanBayDen, GioDi, GioDen FROM ChuyenBay"
@@ -38,27 +40,49 @@ def index():
     # Lấy danh sách loại máy bay từ cơ sở dữ liệu
     query = "SELECT MaLoai, HangSanXuat FROM LoaiMayBay"
     cursor.execute(query)
-    aircraft_info = [row for row in cursor.fetchall()]
+    aircraft_info = [dict(MaLoai=row[0], HangSanXuat=row[1]) for row in cursor.fetchall()]
 
     # Lấy danh sách thông tin đặt chỗ từ cơ sở dữ liệu
     query = "SELECT KhachHang.MaKH, NgayDi, ChuyenBay.MaChuyenBay FROM DatCho JOIN KhachHang ON DatCho.MaKH = KhachHang.MaKH JOIN ChuyenBay ON DatCho.MaChuyenBay = ChuyenBay.MaChuyenBay"
     cursor.execute(query)
     booking_info = [row for row in cursor.fetchall()]
 
-    # Lấy danh sách khách hàng từ cơ sở dữ liệu
-    query = "SELECT MaKH FROM KhachHang"
+    # Lấy thông tin đầy đủ về khách hàng từ cơ sở dữ liệu
+    query = "SELECT MaKH, SDT, HoDem, Ten, DiaChi FROM KhachHang"
     cursor.execute(query)
-    customer_list = [row for row in cursor.fetchall()]
+    customer_info = [row for row in cursor.fetchall()]
 
-    # Lấy danh sách chuyến bay từ cơ sở dữ liệu
-    query = "SELECT MaChuyenBay FROM ChuyenBay"
+    # Lấy danh sách máy bay từ cơ sở dữ liệu
+    query = "SELECT SoHieu, MayBay.MaLoai, SoGheNgoi FROM MayBay JOIN LoaiMayBay ON MayBay.MaLoai = LoaiMayBay.MaLoai"
     cursor.execute(query)
-    flight_list = [row for row in cursor.fetchall()]
+    plane_info = [dict(SoHieu=row[0], MaLoai=row[1], SoGheNgoi=row[2]) for row in cursor.fetchall()]
 
-    return render_template('index.html', flight_info=flight_info, plane_info=plane_info, booking_info=booking_info,
-                       aircraft_info=aircraft_info, customer_info=customer_info, employee_info=employee_info,
-                       schedule_info=schedule_info, assignment_info=assignment_info,
-                       customer_list=customer_list, flight_list=flight_list)
+    # Lấy thông tin đầy đủ về nhân viên từ cơ sở dữ liệu
+    query = "SELECT MaNV, HoDem, Ten, SDT, DiaChi, Luong, LoaiNV FROM NhanVien"
+    cursor.execute(query)
+    employee_info = [row for row in cursor.fetchall()]
+
+    # Lấy thông tin lịch bay từ cơ sở dữ liệu
+    query = "SELECT * FROM LichBay"
+    cursor.execute(query)
+    schedule_rows = cursor.fetchall()
+
+    # Lấy thông tin phân công từ cơ sở dữ liệu
+    query = "SELECT KhachHang.MaKH, DatCho.NgayDi, DatCho.MaChuyenBay FROM DatCho JOIN KhachHang ON DatCho.MaKH = KhachHang.MaKH"
+    cursor.execute(query)
+    assignment_info = [row for row in cursor.fetchall()]
+
+    return render_template('index.html',
+                           flight_info=flight_info,
+                           plane_info=plane_info,
+                           booking_info=booking_info,
+                           aircraft_info=aircraft_info,
+                           customer_info=customer_info,
+                           employee_info=employee_info,
+                           schedule_info=schedule_rows,
+                           assignment_info=assignment_info,
+                           customer_list=customer_list,
+                           flight_list=flight_list)
 
 @app.route('/them_cb', methods=['POST'])
 def them_cb():
@@ -121,7 +145,6 @@ def xoa_loai_mb(plane_type_id):
     cursor.execute(query, (plane_type_id,))
     cnxn.commit()
     return redirect(url_for('index', section='aircraft-types'))
-
 
 # Hàm kiểm tra tồn tại khách hàng
 def check_customer_exists(customer_id):
@@ -222,10 +245,11 @@ def them_mb():
     plane_type_id = request.form['plane-type-id']
     seat_quantity = request.form['seat-quantity']
 
-    # Thực hiện các thao tác thêm thông tin máy bay vào cơ sở dữ liệu ở đây
-    # ...
-
-    return redirect(url_for('index'))  # Hoặc chuyển hướng đến trang cần thiết
+    query = "INSERT INTO MayBay (SoHieu, MaLoai, SoGheNgoi) VALUES (?, ?, ?)"
+    values = (plane_id, plane_type_id, seat_quantity)
+    cursor.execute(query, values)
+    cnxn.commit()
+    return redirect(url_for('index'))
 
 @app.route('/sua_mb', methods=['POST'])
 def sua_mb():
@@ -233,155 +257,178 @@ def sua_mb():
     plane_type_id = request.form['plane-type-id']
     seat_quantity = request.form['seat-quantity']
 
-    # Thực hiện các thao tác sửa thông tin máy bay trong cơ sở dữ liệu ở đây
-    # ...
+    query = "UPDATE MayBay SET MaLoai = ?, SoGheNgoi = ? WHERE SoHieu = ?"
+    values = (plane_type_id, seat_quantity, plane_id)
+    cursor.execute(query, values)
+    cnxn.commit()
+    return redirect(url_for('index'))
 
-    return redirect(url_for('index'))  # Hoặc chuyển hướng đến trang cần thiết
-
-@app.route('/xoa_mb/<plane_id>', methods=['DELETE'])
+@app.route('/xoa_mb/<plane_id>', methods=['POST'])
 def xoa_mb(plane_id):
-    # Thực hiện các thao tác xóa thông tin máy bay từ cơ sở dữ liệu ở đây
-    # ...
-
-    return redirect(url_for('index'))  # Hoặc chuyển hướng đến trang cần thiết
+    query = "DELETE FROM MayBay WHERE SoHieu = ?"
+    cursor.execute(query, (plane_id,))
+    cnxn.commit()
+    return redirect(url_for('index'))
 
 @app.route('/them_kh', methods=['POST'])
 def them_kh():
     customer_id = request.form['customer-id']
-    customer_name = request.form['customer-name']
     customer_phone = request.form['customer-phone']
+    customer_last_name = request.form['customer-last-name']
+    customer_first_name = request.form['customer-first-name']
     customer_address = request.form['customer-address']
-
-    query = "INSERT INTO KhachHang (MaKH, TenKH, SDT, DiaChi) VALUES (?, ?, ?, ?)"
-    values = (customer_id, customer_name, customer_phone, customer_address)
+    query = "INSERT INTO KhachHang (MaKH, SDT, HoDem, Ten, DiaChi) VALUES (?, ?, ?, ?, ?)"
+    values = (customer_id, customer_phone, customer_last_name, customer_first_name, customer_address)
     cursor.execute(query, values)
     cnxn.commit()
-
-    return redirect(url_for('index'))  # Chuyển hướng sau khi thêm
+    return redirect(url_for('index'))
 
 @app.route('/sua_kh', methods=['POST'])
 def sua_kh():
     customer_id = request.form['customer-id']
-    customer_name = request.form['customer-name']
     customer_phone = request.form['customer-phone']
+    customer_last_name = request.form['customer-last-name']
+    customer_first_name = request.form['customer-first-name']
     customer_address = request.form['customer-address']
-
-    query = "UPDATE KhachHang SET TenKH = ?, SDT = ?, DiaChi = ? WHERE MaKH = ?"
-    values = (customer_name, customer_phone, customer_address, customer_id)
+    query = "UPDATE KhachHang SET SDT = ?, HoDem = ?, Ten = ?, DiaChi = ? WHERE MaKH = ?"
+    values = (customer_phone, customer_last_name, customer_first_name, customer_address, customer_id)
     cursor.execute(query, values)
     cnxn.commit()
+    return redirect(url_for('index'))
 
-    return redirect(url_for('index'))  # Chuyển hướng sau khi sửa
-
-@app.route('/xoa_kh/<customer_id>', methods=['DELETE'])
+@app.route('/xoa_kh/<customer_id>', methods=['POST'])
 def xoa_kh(customer_id):
     query = "DELETE FROM KhachHang WHERE MaKH = ?"
     cursor.execute(query, (customer_id,))
     cnxn.commit()
-
-    return redirect(url_for('index'))  # Chuyển hướng sau khi xóa
+    return redirect(url_for('index'))
 
 @app.route('/them_nv', methods=['POST'])
 def them_nv():
     employee_id = request.form['employee-id']
-    employee_name = request.form['employee-name']
+    employee_last_name = request.form['employee-last-name']
+    employee_first_name = request.form['employee-first-name']
     employee_phone = request.form['employee-phone']
     employee_address = request.form['employee-address']
+    employee_salary = request.form['employee-salary']
+    employee_type = request.form['employee-type']
 
-    query = "INSERT INTO NhanVien (MaNV, TenNV, SDT, DiaChi) VALUES (?, ?, ?, ?)"
-    values = (employee_id, employee_name, employee_phone, employee_address)
+    query = "INSERT INTO NhanVien (MaNV, HoDem, Ten, SDT, DiaChi, Luong, LoaiNV) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    values = (employee_id, employee_last_name, employee_first_name, employee_phone, employee_address, employee_salary, employee_type)
     cursor.execute(query, values)
     cnxn.commit()
-
-    return redirect(url_for('index'))  # Chuyển hướng sau khi thêm
+    return redirect(url_for('index'))
 
 @app.route('/sua_nv/<employee_id>', methods=['POST'])
 def sua_nv(employee_id):
-    employee_name = request.form['employee-name']
+    employee_last_name = request.form['employee-last-name']
+    employee_first_name = request.form['employee-first-name']
     employee_phone = request.form['employee-phone']
     employee_address = request.form['employee-address']
+    employee_salary = request.form['employee-salary']
+    employee_type = request.form['employee-type']
 
-    query = "UPDATE NhanVien SET TenNV = ?, SDT = ?, DiaChi = ? WHERE MaNV = ?"
-    values = (employee_name, employee_phone, employee_address, employee_id)
+    query = "UPDATE NhanVien SET HoDem = ?, Ten = ?, SDT = ?, DiaChi = ?, Luong = ?, LoaiNV = ? WHERE MaNV = ?"
+    values = (employee_last_name, employee_first_name, employee_phone, employee_address, employee_salary, employee_type, employee_id)
     cursor.execute(query, values)
     cnxn.commit()
+    return redirect(url_for('index'))
 
-    return redirect(url_for('index'))  # Chuyển hướng sau khi sửa
-
-@app.route('/xoa_nv/<employee_id>', methods=['DELETE'])
+@app.route('/xoa_nv/<employee_id>', methods=['POST'])
 def xoa_nv(employee_id):
     query = "DELETE FROM NhanVien WHERE MaNV = ?"
     cursor.execute(query, (employee_id,))
     cnxn.commit()
-
     return redirect(url_for('index'))  # Chuyển hướng sau khi xóa
 
 @app.route('/them_lich', methods=['POST'])
 def them_lich():
+    flight_id = request.form['flight-id']
+    aircraft_id = request.form['aircraft-id']
+    aircraft_type_id = request.form['aircraft-type-id']
+    departure_date = request.form['departure-date']
+
+    query = "INSERT INTO LichBay (NgayDi, MaChuyenBay, SoHieu, MaLoai) VALUES (?, ?, ?, ?)"
+    values = (departure_date, flight_id, aircraft_id, aircraft_type_id)
+    cursor.execute(query, values)
+    cnxn.commit()
+    return redirect(url_for('index'))
+
+@app.route('/sua_lich', methods=['POST'])
+def sua_lich():
     schedule_id = request.form['schedule-id']
     flight_id = request.form['flight-id']
+    aircraft_id = request.form['aircraft-id']
+    aircraft_type_id = request.form['aircraft-type-id']
     departure_date = request.form['departure-date']
-    arrival_date = request.form['arrival-date']
 
-    query = "INSERT INTO LichBay (MaLichBay, MaCB, NgayDi, NgayDen) VALUES (?, ?, ?, ?)"
-    values = (schedule_id, flight_id, departure_date, arrival_date)
+    query = "UPDATE LichBay SET MaChuyenBay = ?, SoHieu = ?, MaLoai = ?, NgayDi = ? WHERE MaChuyenBay = ?"
+    values = (flight_id, aircraft_id, aircraft_type_id, departure_date, schedule_id)
     cursor.execute(query, values)
     cnxn.commit()
+    return redirect(url_for('index'))
 
-    return redirect(url_for('index'))  # Chuyển hướng sau khi thêm
-
-@app.route('/sua_lich/<schedule_id>', methods=['POST'])
-def sua_lich(schedule_id):
-    flight_id = request.form['flight-id']
-    departure_date = request.form['departure-date']
-    arrival_date = request.form['arrival-date']
-
-    query = "UPDATE LichBay SET MaCB = ?, NgayDi = ?, NgayDen = ? WHERE MaLichBay = ?"
-    values = (flight_id, departure_date, arrival_date, schedule_id)
-    cursor.execute(query, values)
-    cnxn.commit()
-
-    return redirect(url_for('index'))  # Chuyển hướng sau khi sửa
-
-@app.route('/xoa_lich/<schedule_id>', methods=['DELETE'])
-def xoa_lich(schedule_id):
-    query = "DELETE FROM LichBay WHERE MaLichBay = ?"
-    cursor.execute(query, (schedule_id,))
-    cnxn.commit()
-
-    return redirect(url_for('index'))  # Chuyển hướng sau khi xóa
+@app.route('/xoa_lich', methods=['POST'])
+def xoa_lich():
+       flight_id = request.form['flight-id']
+       aircraft_id = request.form['aircraft-id']  # Lấy giá trị từ form
+       departure_date = request.form['departure-date'] 
+       query = "DELETE FROM LichBay WHERE NgayDi = ? AND MaChuyenBay = ? AND SoHieu = ?"
+       values = (departure_date, flight_id, aircraft_id)
+       cursor.execute(query, values)
+       cnxn.commit()
+       return redirect(url_for('index'))
+   
 
 @app.route('/them_phan_cong', methods=['POST'])
 def them_phan_cong():
-    employee_id = request.form['employee-id']
-    schedule_id = request.form['schedule-id']
+    customer_id = request.form['customer-id']
+    flight_id = request.form['schedule-id'] 
 
-    query = "INSERT INTO PhanCong (MaNV, MaLichBay) VALUES (?, ?)"
-    values = (employee_id, schedule_id)
-    cursor.execute(query, values)
-    cnxn.commit()
+    # Lấy ngày đi từ danh sách chuyến bay (giả sử bạn có hàm lấy ngày đi)
+    departure_date = get_departure_date(flight_id)
 
-    return redirect(url_for('index'))  # Chuyển hướng sau khi thêm
+    query = "INSERT INTO DatCho (MaKH, NgayDi, MaChuyenBay) VALUES (?, ?, ?)"
+    values = (customer_id, departure_date, flight_id)
+    cursor.execute(query, values)  # Cung cấp đầy đủ 3 tham số
+    conn.commit()
 
-@app.route('/sua_phan_cong/<employee_id>/<schedule_id>', methods=['POST'])
-def sua_phan_cong(employee_id, schedule_id):
-    new_employee_id = request.form['new-employee-id']
-    new_schedule_id = request.form['new-schedule-id']
+    return redirect(url_for('index'))
 
-    query = "UPDATE PhanCong SET MaNV = ?, MaLichBay = ? WHERE MaNV = ? AND MaLichBay = ?"
-    values = (new_employee_id, new_schedule_id, employee_id, schedule_id)
-    cursor.execute(query, values)
-    cnxn.commit()
+@app.route('/sua_phan_cong/<customer_id>/<departure_date>/<flight_id>', methods=['GET', 'POST'])
+def sua_phan_cong(customer_id, departure_date, flight_id):
+         if request.method == 'GET':
+             # Lấy thông tin phân công hiện tại để hiển thị trong form sửa
+             query = "SELECT * FROM DatCho WHERE MaKH = ? AND NgayDi = ? AND MaChuyenBay = ?"
+             cursor.execute(query, (customer_id, departure_date, flight_id))
+             assignment_info = cursor.fetchone()
+             if assignment_info is None:
+                 return 'Phân công không tồn tại'  # Xử lý trường hợp phân công không tồn tại
+ 
+             # Lấy danh sách khách hàng và chuyến bay để hiển thị trong form
+             customer_info = get_customer_info()  # Hàm lấy danh sách khách hàng
+             flight_info = get_flight_info()  # Hàm lấy danh sách chuyến bay
+             return render_template('sua_phan_cong.html', assignment_info=assignment_info, customer_info=customer_info, flight_info=flight_info)
+         elif request.method == 'POST':
+             # Lấy dữ liệu từ form sửa
+             new_customer_id = request.form['new-customer-id']
+             new_departure_date = request.form['new-departure-date']
+             new_flight_id = request.form['new-flight-id']
+ 
+             # Cập nhật thông tin phân công trong database
+             query = "UPDATE DatCho SET MaKH = ?, NgayDi = ?, MaChuyenBay = ? WHERE MaKH = ? AND NgayDi = ? AND MaChuyenBay = ?"
+             values = (new_customer_id, new_departure_date, new_flight_id, customer_id, departure_date, flight_id)
+             cursor.execute(query, values)
+             conn.commit()
+             return redirect(url_for('index')) 
 
-    return redirect(url_for('index'))  # Chuyển hướng sau khi sửa
+@app.route('/xoa_phan_cong/<customer_id>/<departure_date>/<flight_id>', methods=['POST'])
+def xoa_phan_cong(customer_id, departure_date, flight_id):
+    query = "DELETE FROM DatCho WHERE MaKH = ? AND NgayDi = ? AND MaChuyenBay = ?"
+    cursor.execute(query, (customer_id, departure_date, flight_id))
+    conn.commit()
+    return redirect(url_for('index'))
 
-@app.route('/xoa_phan_cong/<employee_id>/<schedule_id>', methods=['DELETE'])
-def xoa_phan_cong(employee_id, schedule_id):
-    query = "DELETE FROM PhanCong WHERE MaNV = ? AND MaLichBay = ?"
-    cursor.execute(query, (employee_id, schedule_id))
-    cnxn.commit()
-
-    return redirect(url_for('index'))  # Chuyển hướng sau khi xóa
 
 if __name__ == '__main__':
     app.run(debug=True)

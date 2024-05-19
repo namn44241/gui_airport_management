@@ -1,23 +1,58 @@
-/* styles.css */
+/* Định dạng cho toàn bộ trang */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #f0f8ff;
 }
 
+/* Định dạng cho header */
 header {
-    background-color: #333;
+    background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
     color: white;
     padding: 20px;
     text-align: center;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
+header::before, header::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.1;
+    pointer-events: none;
+    animation: snow 10s linear infinite;
+}
+
+header::before {
+    left: 10%;
+}
+
+header::after {
+    right: 10%;
+    animation-delay: 5s;
+}
+
+@keyframes snow {
+    0% { transform: translateY(-100px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* Định dạng cho thanh điều hướng */
 nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    background-color: #f1f1f1;
+    background-color: #333;
     overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 nav ul li {
@@ -28,27 +63,34 @@ nav ul li a {
     display: block;
     padding: 10px 20px;
     text-decoration: none;
-    color: #333;
+    color: white;
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 nav ul li a:hover {
-    background-color: #ddd;
+    background-color: #555;
+    transform: scale(1.1);
 }
 
+/* Định dạng cho nội dung chính */
 main {
     padding: 20px;
 }
 
+/* Định dạng cho form */
 form label {
     display: block;
     margin-bottom: 5px;
 }
 
-form input[type="text"] {
+form input[type="text"],
+form input[type="datetime-local"] {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
     box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 form button {
@@ -57,18 +99,24 @@ form button {
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
 }
 
 form button:hover {
     background-color: #555;
 }
 
+/* Định dạng cho bảng */
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-table th, table td {
+table th,
+table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
@@ -77,6 +125,12 @@ table th, table td {
 table th {
     background-color: #f2f2f2;
 }
+
+table th {
+    background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+    color: white;
+}
+
 /* Ẩn các phần nội dung mặc định */
 main section {
     display: none;
