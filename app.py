@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, render_template_string
+from flask import Flask, render_template, request, redirect, url_for, render_template_string, jsonify
 import pyodbc
 from datetime import datetime
 
@@ -167,66 +167,91 @@ def check_flight_schedule_exists(flight_id, departure_date):
     count = cursor.fetchone()[0]
     return count > 0
 
-@app.route('/get_departure_date/<customer_id>/<flight_id>', methods=['GET'])
-def get_departure_date(customer_id, flight_id):
-    query = "SELECT NgayDi FROM DatCho WHERE MaKH = ? AND MaChuyenBay = ?"
-    cursor.execute(query, (customer_id, flight_id))
-    result = cursor.fetchone()
-    if result:
-        departure_date = result[0].strftime('%Y-%m-%d')
-        return {'departure_date': departure_date}
-    else:
-        return {'departure_date': ''}
+def get_flight_dates(flight_id):
+    query = "SELECT NgayDi FROM LichBay WHERE MaChuyenBay = ?"
+    cursor.execute(query, (flight_id,))
+    result = cursor.fetchall()
+    flight_dates = [row[0] for row in result]
+    return flight_dates
     
+def check_flight_schedule_exists(flight_id, departure_date):
+    query = "SELECT COUNT(*) FROM LichBay WHERE MaChuyenBay = ? AND NgayDi = ?"
+    cursor.execute(query, (flight_id, departure_date))
+    return cursor.fetchone()[0] > 0
+
+
+@app.route('/get_flight_dates', methods=['GET'])
+def get_flight_dates_route():
+    flight_id = request.args.get('flight_id')
+    flight_dates = get_flight_dates(flight_id)
+    return jsonify({'flight_dates': flight_dates})
+
 @app.route('/them_dat_cho', methods=['POST'])
 def them_dat_cho():
     customer_id = request.form['customer-id']
-    departure_date = request.form['departure-date']
+    departure_date_str = request.form['departure-date']
     flight_id = request.form['flight-id']
+
+    # Chuyển đổi chuỗi ngày tháng thành định dạng '%Y-%m-%d'
+    departure_date = datetime.strptime(departure_date_str, '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d')
 
     # Kiểm tra xem MaKH có tồn tại trong bảng KhachHang hay không
     if not check_customer_exists(customer_id):
-        return "Mã khách hàng không hợp lệ"
+        error_message = "Mã khách hàng không hợp lệ. Vui lòng nhập lại."
+        return render_template('index.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng ChuyenBay hay không
     if not check_flight_exists(flight_id):
-        return "Mã chuyến bay không hợp lệ"
+        error_message = "Mã chuyến bay không hợp lệ. Vui lòng nhập lại."
+        return render_template('index.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng LichBay hay không với NgayDi
     if not check_flight_schedule_exists(flight_id, departure_date):
-        return "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn"
+        error_message = "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn. Vui lòng nhập lại."
+        return render_template('index.html', error_message=error_message)
+
+    # Chuyển đổi departure_date thành đối tượng date
+    departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
 
     # Thực hiện thêm thông tin đặt chỗ vào cơ sở dữ liệu
     query = "INSERT INTO DatCho (MaKH, NgayDi, MaChuyenBay) VALUES (?, ?, ?)"
     values = (customer_id, departure_date, flight_id)
     cursor.execute(query, values)
     cnxn.commit()
-
     return redirect(url_for('index'))
 
 @app.route('/sua_dat_cho', methods=['POST'])
 def sua_dat_cho():
     customer_id = request.form['customer-id']
-    departure_date = request.form['departure-date']
+    departure_date_str = request.form['departure-date']
     flight_id = request.form['flight-id']
+
+    # Chuyển đổi chuỗi ngày tháng thành định dạng '%Y-%m-%d'
+    departure_date = datetime.strptime(departure_date_str, '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d')
 
     # Kiểm tra xem MaKH có tồn tại trong bảng KhachHang hay không
     if not check_customer_exists(customer_id):
-        return "Mã khách hàng không hợp lệ"
+        error_message = "Mã khách hàng không hợp lệ. Vui lòng nhập lại."
+        return render_template('index.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng ChuyenBay hay không
     if not check_flight_exists(flight_id):
-        return "Mã chuyến bay không hợp lệ"
+        error_message = "Mã chuyến bay không hợp lệ. Vui lòng nhập lại."
+        return render_template('index.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng LichBay hay không với NgayDi
     if not check_flight_schedule_exists(flight_id, departure_date):
-        return "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn"
+        error_message = "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn. Vui lòng nhập lại."
+        return render_template('index.html', error_message=error_message)
 
+    # Chuyển đổi departure_date thành đối tượng date
+    departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
+
+    
     query = "UPDATE DatCho SET MaChuyenBay = ?, NgayDi = ? WHERE MaKH = ?"
     values = (flight_id, departure_date, customer_id)
     cursor.execute(query, values)
     cnxn.commit()
-
     return redirect(url_for('index'))
 
 @app.route('/xoa_dat_cho/<customer_id>/<departure_date>/<flight_id>', methods=['POST'])
@@ -237,7 +262,7 @@ def xoa_dat_cho(customer_id, departure_date, flight_id):
     cursor.execute(query, values)
     cnxn.commit()
 
-    return redirect(url_for('index'))
+    return redirect(url_for('index')) 
 
 @app.route('/them_mb', methods=['POST'])
 def them_mb():

@@ -6,165 +6,428 @@
     <title>Quản lí sân bay</title>
     <link rel="stylesheet" href="">
     <style>
+    /* Preloader styles */
+    #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    #preloader.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .spinner {
+        width: 150px;
+        height: 150px;
+        border: 4px solid #fff;
+        border-top: 4px solid #ff6f61;
+        border-radius: 50%;
+        animation: spin 1s linear infinite, scale 3s ease-in-out infinite;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .avatar {
+        width: 80%;
+        height: 80%;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes scale {
+        0%, 100% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.1); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    /* Hide the main content initially */
+    body > *:not(#preloader) {
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    body.loaded > *:not(#preloader) {
+        opacity: 1;
+    }
       /* Định dạng cho toàn bộ trang */
-      body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 0;
-          background-color: #f0f8ff;
-      }
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f8ff;
+    }
 
-      /* Định dạng cho header */
-      header {
-          background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
-          color: white;
-          padding: 20px;
-          text-align: center;
-          border-radius: 0 0 20px 20px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-          position: relative;
-      }
+    /* Định dạng cho header */
+    header {
+        background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
 
-      header::before, header::after {
-          content: '';
-          position: absolute;
-          top: 50%;
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          background: white;
-          opacity: 0.1;
-          pointer-events: none;
-          animation: snow 10s linear infinite;
-      }
+    header h1 {
+        font-size: 3em;
+        animation: color-change 1s infinite;
+        margin-bottom: 10px;
+    }
 
-      header::before {
-          left: 10%;
-      }
+    @keyframes color-change {
+        0% { color: #ff0000; }
+        25% { color: #00ff00; }
+        50% { color: #0000ff; }
+        75% { color: #ffff00; }
+        100% { color: #ff00ff; }
+    }
 
-      header::after {
-          right: 10%;
-          animation-delay: 5s;
-      }
+    header::before, header::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: white;
+        opacity: 0.1;
+        pointer-events: none;
+        animation: snow 10s linear infinite;
+    }
 
-      @keyframes snow {
-          0% { transform: translateY(-100px) rotate(0deg); }
-          100% { transform: translateY(100vh) rotate(360deg); }
-      }
+    header::before { left: 10%; }
+    header::after { right: 10%; animation-delay: 5s; }
 
-      /* Định dạng cho thanh điều hướng */
-      nav ul {
-          list-style-type: none;
-          margin: 0;
-          padding: 0;
-          background-color: #333;
-          overflow: hidden;
-          border-radius: 20px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+    @keyframes snow {
+        0% { transform: translateY(-100px) rotate(0deg); }
+        100% { transform: translateY(100vh) rotate(360deg); }
+    }
 
-      nav ul li {
-          float: left;
-      }
+    /* Định dạng cho thanh điều hướng */
+    nav {
+        margin: 20px 0;
+    }
 
-      nav ul li a {
-          display: block;
-          padding: 10px 20px;
-          text-decoration: none;
-          color: white;
-          transition: background-color 0.3s, transform 0.3s;
-      }
+    nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+        overflow: visible;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: center;
+    }
 
-      nav ul li a:hover {
-          background-color: #555;
-          transform: scale(1.1);
-      }
+    nav ul li {
+        position: relative;
+    }
 
-      /* Định dạng cho nội dung chính */
-      main {
-          padding: 20px;
-      }
+    nav ul li a {
+        display: block;
+        padding: 15px 20px;
+        text-decoration: none;
+        color: white;
+        transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        text-align: center;
+        font-weight: bold;
+        white-space: nowrap;
+    }
 
-      /* Định dạng cho form */
-      form label {
-          display: block;
-          margin-bottom: 5px;
-      }
+    nav > ul > li > a:after {
+        content: ' ▼';
+        font-size: 0.8em;
+        display: none;
+    }
 
-      form input[type="text"],
-      form input[type="datetime-local"] {
-          width: 100%;
-          padding: 8px;
-          margin-bottom: 10px;
-          box-sizing: border-box;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-      }
+    nav > ul > li:nth-child(2) > a:after,
+    nav > ul > li:nth-child(3) > a:after {
+        display: inline;
+    }
 
-      form button {
-          padding: 10px 20px;
-          background-color: #333;
-          color: white;
-          border: none;
-          cursor: pointer;
-          border-radius: 5px;
-          transition: background-color 0.3s;
-      }
+    nav ul li > a:hover {
+        background-color: #ff6f61;
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+    }
 
-      form button:hover {
-          background-color: #555;
-      }
+    nav ul ul {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        min-width: 200px;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+    }
 
-      /* Định dạng cho bảng */
-      table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
+    nav ul li:hover > ul {
+        display: block;
+        opacity: 1;
+        transform: translateX(-50%) translateY(5px);
+    }
 
-      table th,
-      table td {
-          border: 1px solid #ddd;
-          padding: 8px;
-          text-align: left;
-      }
+    nav ul ul li {
+        width: 100%;
+    }
 
-      table th {
-          background-color: #f2f2f2;
-      }
+    nav ul ul li a {
+        padding: 12px 20px;
+        color: white;
+        text-decoration: none;
+        display: block;
+        text-align: left;
+        font-weight: normal;
+        transition: background-color 0.3s, padding-left 0.3s;
+    }
 
-      table th {
-          background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
-          color: white;
-      }
+    nav ul ul li a:hover {
+        background-color: #ff6f61;
+        transform: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding-left: 25px;
+    }
 
-      /* Ẩn các phần nội dung mặc định */
-      main section {
-          display: none;
-      }
+    nav ul ul li:first-child a {
+        border-radius: 5px 5px 0 0;
+    }
 
-      /* Hiển thị phần nội dung khi được chọn */
-      main section:target {
-          display: block;
-      }
+    nav ul ul li:last-child a {
+        border-radius: 0 0 5px 5px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        nav ul {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        nav ul li {
+            width: 100%;
+        }
+
+        nav > ul > li > a:after {
+            float: right;
+            line-height: 1.5;
+        }
+
+        nav ul ul {
+            position: static;
+            transform: none;
+            width: 100%;
+            box-shadow: none;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+        }
+
+        nav ul li:hover > ul {
+            display: block;
+            transform: none;
+        }
+
+        nav ul ul li a {
+            padding-left: 40px;
+        }
+
+        nav ul ul li a:hover {
+            padding-left: 45px;
+        }
+    }
+    /* Định dạng cho nội dung chính */
+    main {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Định dạng cho form */
+    form {
+        background-color: #f4f4f4;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    form input[type="text"],
+    form input[type="datetime-local"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    form button {
+        padding: 12px 24px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    form button:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+    }
+
+    /* Định dạng cho bảng */
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    table th,
+    table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    table th {
+        background: linear-gradient(90deg, rgba(58,123,213,1) 0%, rgba(0,210,255,1) 100%);
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f8f8f8;
+    }
+
+    table tr:hover {
+        background-color: #e8e8e8;
+    }
+
+    /* Định dạng cho các section */
+    main section {
+        display: none;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
+
+    main section:target {
+        display: block;
+        animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        nav ul {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        nav ul li {
+            width: 100%;
+        }
+
+        nav ul ul {
+            position: static;
+            display: none;
+            width: 100%;
+            box-shadow: none;
+        }
+
+        nav ul li:hover > ul {
+            display: block;
+        }
+    }
   </style>
 </head>
 <body>
+  <div id="preloader">
+    <div class="spinner">
+      <img src="wings.png" alt="Avatar" class="avatar">
+    </div>
+  </div>
   <header>
       <h1>Quản lí sân bay</h1>
   </header>
   <nav>
-      <ul>
-          <li><a href="#flight-info">Quản lý thông tin chuyến bay</a></li>
-          <li><a href="#airport-info">Quản lý thông tin loại máy bay</a></li>
-          <li><a href="#airline-info">Quản lý thông tin đặt chỗ</a></li>
-          <li><a href="#aircraft-info">Quản lý thông tin máy bay</a></li>
-          <li><a href="#customer-info">Quản lý thông tin khách hàng</a></li>
-          <li><a href="#employee-info">Quản lý thông tin nhân viên</a></li>
-          <li><a href="#schedule-info">Quản lý lịch bay</a></li>
-          <li><a href="#assignment-info">Quản lý phân công</a></li>
-      </ul>
+    <ul>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li>
+        <a href="#create-data">Tạo dữ liệu </a>
+        <ul>
+          <li><a href="#customer-info">Khách hàng</a></li>
+          <li><a href="#employee-info">Nhân viên</a></li>
+          <li><a href="#airport-info">Sân bay</a></li>
+          <li><a href="#aircraft-info">Máy bay</a></li>
+          <li><a href="#flight-info">Chuyến bay</a></li>
+          <li><a href="#schedule-info">Lịch bay</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#exploit-data">Khai thác dữ liệu </a>
+        <ul>
+          <li><a href="#airline-info">Đặt chỗ</a></li>
+          <li><a href="#assignment-info">Phân công</a></li>
+        </ul>
+      </li>
+    </ul>
   </nav>
     <main>
         <section id="flight-info">
@@ -302,51 +565,67 @@
           
             <!-- Form để thêm thông tin đặt chỗ mới -->
             <form method="POST" action="{{ url_for('them_dat_cho') }}">
-                <label for="customer-id">Mã khách hàng:</label>
-                <select id="customer-id" name="customer-id" required>
-                    <option value="">-- Chọn mã khách hàng --</option>
-                    {% for customer in customer_list %}
-                    <option value="{{ customer.MaKH }}">{{ customer.MaKH }}</option>
-                    {% endfor %}
-                </select><br>
+              <label for="customer-id">Mã khách hàng:</label>
+              <input type="text" id="customer-id" name="customer-id" required>
+              <br>
 
-                <label for="departure-date">Ngày đi:</label>
-                <input type="date" id="departure-date" name="departure-date" required><br>
+              <label for="flight-id">Mã chuyến bay:</label>
+              <input type="text" id="flight-id" name="flight-id" required onchange="updateFlightDates(this.value)">
+              <br>
 
-                <label for="flight-id">Mã chuyến bay:</label>
-                <select id="flight-id" name="flight-id" required>
-                    <option value="">-- Chọn mã chuyến bay --</option>
-                    {% for flight in flight_list %}
-                    <option value="{{ flight.MaChuyenBay }}">{{ flight.MaChuyenBay }}</option>
-                    {% endfor %}
-                </select><br>
+              <label for="departure-date">Ngày đi:</label>
+              <select id="departure-date" name="departure-date" required></select>
+              <br>
 
-                <button type="submit">Thêm thông tin đặt chỗ</button>
+              <button type="submit">Thêm thông tin đặt chỗ</button>
             </form>
-          
-            <!-- sua_dat_cho.html -->
+
+            <!-- Form để sửa thông tin đặt chỗ -->
+            <h3>hi</h3>
             <form method="POST" action="{{ url_for('sua_dat_cho') }}">
-                <label for="customer-id">Mã khách hàng:</label>
-                <select id="customer-id" name="customer-id" required>
-                    <option value="">-- Chọn mã khách hàng --</option>
-                    {% for customer in customer_list %}
-                    <option value="{{ customer.MaKH }}">{{ customer.MaKH }}</option>
-                    {% endfor %}
-                </select><br>
+              <label for="customer-id">Mã khách hàng:</label>
+              <input type="text" id="customer-id" name="customer-id" required>
+              <br>
+              <label for="flight-id">Mã chuyến bay:</label>
+              <input type="text" id="flight-id" name="flight-id" required onchange="updateFlightDates(this.value)">
+              <br>
+              <label for="departure-date">Ngày đi:</label>
+              <select id="departure-date" name="departure-date" required></select>
+              <br>
+              <button type="submit">Lưu thay đổi</button>
+          </form>
 
-                <label for="departure-date">Ngày đi:</label>
-                <input type="date" id="departure-date" name="departure-date" required><br>
+            <script>
+              function updateFlightDates(flightId) {
+                const departureDate = document.getElementById('departure-date');
+                departureDate.innerHTML = '';
 
-                <label for="flight-id">Mã chuyến bay:</label>
-                <select id="flight-id" name="flight-id" required>
-                    <option value="">-- Chọn mã chuyến bay --</option>
-                    {% for flight in flight_list %}
-                    <option value="{{ flight.MaChuyenBay }}">{{ flight.MaChuyenBay }}</option>
-                    {% endfor %}
-                </select><br>
-
-                <button type="submit">Cập nhật</button>
-            </form>
+                if (flightId) {
+                    fetch(`/get_flight_dates?flight_id=${flightId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const flightDates = data.flight_dates;
+                            const defaultOption = document.createElement('option');
+                            defaultOption.value = '';
+                            defaultOption.text = '-- Chọn ngày đi --';
+                            departureDate.add(defaultOption);
+                            flightDates.forEach(date => {
+                                const option = document.createElement('option');
+                                const formattedDate = new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                                option.value = date;
+                                option.text = formattedDate;
+                                departureDate.add(option);
+                            });
+                        })
+                        .catch(error => console.error(error));
+                } else {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.text = '-- Chọn ngày đi --';
+                    departureDate.add(defaultOption);
+                }
+            }
+          </script>
           
             <!-- Bảng hiển thị thông tin đặt chỗ -->
             <table>
@@ -688,5 +967,22 @@
     <footer>
         <p>&copy; 2024 Quản lí sân bay. All rights reserved.</p>
     </footer>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          document.getElementById('preloader').classList.add('hidden');
+          document.body.classList.add('loaded');
+        }, 5000); 
+      });
+    
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          if (!document.body.classList.contains('loaded')) {
+            document.getElementById('preloader').classList.add('hidden');
+            document.body.classList.add('loaded');
+          }
+        }, 500);
+      });
+    </script>
 </body>
 </html>
