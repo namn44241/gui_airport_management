@@ -3,6 +3,7 @@ import pyodbc
 from datetime import datetime
 
 app = Flask(__name__)
+app.static_folder = 'static' 
 
 # Thông tin kết nối
 dsn = 'QuanLiSanBay'
@@ -84,6 +85,8 @@ def index():
                            customer_list=customer_list,
                            flight_list=flight_list)
 
+### Các hàm xử lý cho quản lý CHUYẾN BAY
+
 @app.route('/them_cb', methods=['POST'])
 def them_cb():
     flight_id = request.form['flight-id']
@@ -118,7 +121,8 @@ def xoa_cb(flight_id):
     cnxn.commit()
     return redirect(url_for('index'))
 
-# Các hàm xử lý cho quản lý loại máy bay
+### Các hàm xử lý cho quản lý LOẠI MÁY BAY
+
 @app.route('/them_loai_mb', methods=['POST'])
 def them_loai_mb():
     plane_type_id = request.form['plane-type-id']
@@ -145,6 +149,9 @@ def xoa_loai_mb(plane_type_id):
     cursor.execute(query, (plane_type_id,))
     cnxn.commit()
     return redirect(url_for('index', section='aircraft-types'))
+
+
+### Các hàm xử lý cho quản lý ĐẶT CHỖ
 
 # Hàm kiểm tra tồn tại khách hàng
 def check_customer_exists(customer_id):
@@ -264,6 +271,8 @@ def xoa_dat_cho(customer_id, departure_date, flight_id):
 
     return redirect(url_for('index')) 
 
+### Các hàm xử lý cho quản lý MÁY BAY
+
 @app.route('/them_mb', methods=['POST'])
 def them_mb():
     plane_id = request.form['plane-id']
@@ -294,6 +303,8 @@ def xoa_mb(plane_id):
     cursor.execute(query, (plane_id,))
     cnxn.commit()
     return redirect(url_for('index'))
+
+### Các hàm xử lý cho quản lý KHÁCH HÀNG
 
 @app.route('/them_kh', methods=['POST'])
 def them_kh():
@@ -327,6 +338,9 @@ def xoa_kh(customer_id):
     cursor.execute(query, (customer_id,))
     cnxn.commit()
     return redirect(url_for('index'))
+
+### Các hàm xử lý cho quản lý NHÂN VIÊN
+
 
 @app.route('/them_nv', methods=['POST'])
 def them_nv():
@@ -364,7 +378,11 @@ def xoa_nv(employee_id):
     query = "DELETE FROM NhanVien WHERE MaNV = ?"
     cursor.execute(query, (employee_id,))
     cnxn.commit()
-    return redirect(url_for('index'))  # Chuyển hướng sau khi xóa
+    return redirect(url_for('index')) 
+
+
+### Các hàm xử lý cho quản lý LỊCH BAY
+
 
 @app.route('/them_lich', methods=['POST'])
 def them_lich():
@@ -403,6 +421,9 @@ def xoa_lich():
        cursor.execute(query, values)
        cnxn.commit()
        return redirect(url_for('index'))
+
+
+### Các hàm xử lý cho quản lý PHÂN CÔNG
    
 
 @app.route('/them_phan_cong', methods=['POST'])
