@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lí sân bay</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-    
-  </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <div id="preloader">
@@ -22,7 +21,7 @@
     <ul>
       <li><a href="#dashboard">Dashboard</a></li>
       <li>
-        <a href="#create-data">Tạo dữ liệu </a>
+        <a>Tạo dữ liệu </a>
         <ul>
           <li><a href="#customer-info">Khách hàng</a></li>
           <li><a href="#employee-info">Nhân viên</a></li>
@@ -33,7 +32,7 @@
         </ul>
       </li>
       <li>
-        <a href="#exploit-data">Khai thác dữ liệu </a>
+        <a>Khai thác dữ liệu </a>
         <ul>
           <li><a href="#airline-info">Đặt chỗ</a></li>
           <li><a href="#assignment-info">Phân công</a></li>
@@ -42,6 +41,101 @@
     </ul>
   </nav>
     <main>
+        <section id="dashboard">
+          <div class="container mt-4">
+            <h1>Airport Management Dashboard</h1>
+            
+            <div class="row">
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Khách Hàng</h5><p>{{ stats.khach_hang }}</p></div></div></div>
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Nhân Viên</h5><p>{{ stats.nhan_vien }}</p></div></div></div>
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Loại Máy Bay</h5><p>{{ stats.loai_may_bay }}</p></div></div></div>
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Máy Bay</h5><p>{{ stats.may_bay }}</p></div></div></div>
+            </div>
+    
+            <div class="row mt-4">
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Chuyến Bay</h5><p>{{ stats.chuyen_bay }}</p></div></div></div>
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Lịch Bay</h5><p>{{ stats.lich_bay }}</p></div></div></div>
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Đặt Chỗ</h5><p>{{ stats.dat_cho }}</p></div></div></div>
+                <div class="col-md-3"><div class="card"><div class="card-body"><h5>Phân Công</h5><p>{{ stats.phan_cong }}</p></div></div></div>
+            </div>
+    
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="loaiMayBayChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="topChuyenBayChart"></canvas>
+                </div>
+            </div>
+    
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="nhanVienTheoLoaiChart"></canvas>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+        $(document).ready(function() {
+            var stats = {{ stats | tojson | safe }};
+
+            // Biểu đồ phân bổ loại máy bay theo hãng
+            if (stats.loai_may_bay_stats) {
+                new Chart(document.getElementById('loaiMayBayChart').getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: stats.loai_may_bay_stats.labels,
+                        datasets: [{
+                            label: 'Số lượng',
+                            data: stats.loai_may_bay_stats.data,
+                            backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF']
+                        }]
+                    },
+                    options: { title: { display: true, text: 'Phân Bổ Loại Máy Bay Theo Hãng' } }
+                });
+            }
+
+            // Biểu đồ top 5 chuyến bay được đặt nhiều nhất
+            if (stats.top_chuyen_bay) {
+                new Chart(document.getElementById('topChuyenBayChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: stats.top_chuyen_bay.labels,
+                        datasets: [{
+                            label: 'Số lượng đặt chỗ',
+                            data: stats.top_chuyen_bay.data,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                        }]
+                    },
+                    options: {
+                        title: { display: true, text: 'Top 5 Chuyến Bay Được Đặt Nhiều Nhất' },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            // Biểu đồ phân bổ nhân viên theo loại
+            if (stats.nhan_vien_theo_loai) {
+                new Chart(document.getElementById('nhanVienTheoLoaiChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: stats.nhan_vien_theo_loai.labels,
+                        datasets: [{
+                            data: stats.nhan_vien_theo_loai.data,
+                            backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0']
+                        }]
+                    },
+                    options: { title: { display: true, text: 'Phân Bổ Nhân Viên Theo Loại' } }
+                });
+            }
+
+            // Kiểm tra nếu có lỗi khi lấy dữ liệu
+            if (!stats.loai_may_bay_stats || !stats.top_chuyen_bay || !stats.nhan_vien_theo_loai) {
+                console.error("Không thể lấy dữ liệu thống kê. Vui lòng kiểm tra lại server.");
+            }
+        });
+        </script>
+        </section>
         <section id="flight-info">
             <h2>Quản lý thông tin chuyến bay</h2>
           

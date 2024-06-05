@@ -360,6 +360,93 @@ main section:target {
     animation: fadeIn 0.5s;
 }
 
+/* Dashboard */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Dashboard */
+  #dashboard {
+    background-color: #f4f4f4;
+    padding: 30px 0;
+  }
+  
+  #dashboard h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  /* Stats Row và Column */
+  .stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .stats-col {
+    width: 23%;
+    margin-bottom: 20px;
+  }
+  
+  /* Stats Card */
+  .stats-card {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .stats-card-body {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .stats-card h5 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #444;
+  }
+  
+  .stats-card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  /* Chart Row và Column */
+  .chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .chart-col {
+    width: 48%;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .chart-col.wide {
+    width: 100%;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .stats-col, .chart-col {
+      width: 100%;
+    }
+  }
+
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }

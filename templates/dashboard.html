@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Airport Management Dashboard</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Airport Management Dashboard</h1>
+        
+        <div class="row">
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Khách Hàng</h5><p>{{ stats.khach_hang }}</p></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Nhân Viên</h5><p>{{ stats.nhan_vien }}</p></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Loại Máy Bay</h5><p>{{ stats.loai_may_bay }}</p></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Máy Bay</h5><p>{{ stats.may_bay }}</p></div></div></div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Chuyến Bay</h5><p>{{ stats.chuyen_bay }}</p></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Lịch Bay</h5><p>{{ stats.lich_bay }}</p></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Đặt Chỗ</h5><p>{{ stats.dat_cho }}</p></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><h5>Phân Công</h5><p>{{ stats.phan_cong }}</p></div></div></div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <canvas id="loaiMayBayChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="topChuyenBayChart"></canvas>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <canvas id="nhanVienTheoLoaiChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        $.getJSON('/loai_may_bay_stats', function(data) {
+            new Chart(document.getElementById('loaiMayBayChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Số lượng',
+                        data: data.data,
+                        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF']
+                    }]
+                },
+                options: { title: { display: true, text: 'Phân Bổ Loại Máy Bay Theo Hãng' } }
+            });
+        });
+
+        $.getJSON('/top_chuyen_bay', function(data) {
+            new Chart(document.getElementById('topChuyenBayChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Số lượng đặt chỗ',
+                        data: data.data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    }]
+                },
+                options: {
+                    title: { display: true, text: 'Top 5 Chuyến Bay Được Đặt Nhiều Nhất' },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        });
+
+        $.getJSON('/nhan_vien_theo_loai', function(data) {
+            new Chart(document.getElementById('nhanVienTheoLoaiChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0']
+                    }]
+                },
+                options: { title: { display: true, text: 'Phân Bổ Nhân Viên Theo Loại' } }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

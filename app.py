@@ -73,6 +73,50 @@ def index():
     cursor.execute(query)
     assignment_info = [row for row in cursor.fetchall()]
 
+    # Thống kê số lượng
+    stats = {
+        'khach_hang': cursor.execute("SELECT COUNT(*) FROM KhachHang").fetchone()[0],
+        'nhan_vien': cursor.execute("SELECT COUNT(*) FROM NhanVien").fetchone()[0],
+        'loai_may_bay': cursor.execute("SELECT COUNT(*) FROM LoaiMayBay").fetchone()[0],
+        'may_bay': cursor.execute("SELECT COUNT(*) FROM MayBay").fetchone()[0],
+        'chuyen_bay': cursor.execute("SELECT COUNT(*) FROM ChuyenBay").fetchone()[0],
+        'lich_bay': cursor.execute("SELECT COUNT(*) FROM LichBay").fetchone()[0],
+        'dat_cho': cursor.execute("SELECT COUNT(*) FROM DatCho").fetchone()[0],
+        'phan_cong': cursor.execute("SELECT COUNT(*) FROM PhanCong").fetchone()[0]
+    }
+
+    # API loai_may_bay_stats
+    cursor.execute("SELECT HangSanXuat, COUNT(*) FROM LoaiMayBay GROUP BY HangSanXuat")
+    loai_may_bay_stats = cursor.fetchall()
+    stats['loai_may_bay_stats'] = {
+        'labels': [s[0] for s in loai_may_bay_stats],
+        'data': [s[1] for s in loai_may_bay_stats]
+    }
+
+    # API top_chuyen_bay
+    query = """
+    SELECT TOP 5 ChuyenBay.MaChuyenBay, ChuyenBay.TenSanBayDi, ChuyenBay.TenSanBayDen, COUNT(DatCho.MaKH) as total_bookings
+    FROM ChuyenBay 
+    JOIN LichBay ON LichBay.MaChuyenBay = ChuyenBay.MaChuyenBay
+    JOIN DatCho ON DatCho.MaChuyenBay = LichBay.MaChuyenBay AND DatCho.NgayDi = LichBay.NgayDi
+    GROUP BY ChuyenBay.MaChuyenBay, ChuyenBay.TenSanBayDi, ChuyenBay.TenSanBayDen
+    ORDER BY total_bookings DESC
+    """
+    cursor.execute(query)
+    top_flights = cursor.fetchall()
+    stats['top_chuyen_bay'] = {
+        'labels': [f"{f[0]} ({f[1]} -> {f[2]})" for f in top_flights],
+        'data': [f[3] for f in top_flights]
+    }
+
+    # API nhan_vien_theo_loai
+    cursor.execute("SELECT LoaiNV, COUNT(*) FROM NhanVien GROUP BY LoaiNV")
+    nhan_vien_stats = cursor.fetchall()
+    stats['nhan_vien_theo_loai'] = {
+        'labels': [s[0] for s in nhan_vien_stats],
+        'data': [s[1] for s in nhan_vien_stats]
+    }
+
     return render_template('index.html',
                            flight_info=flight_info,
                            plane_info=plane_info,
@@ -83,7 +127,44 @@ def index():
                            schedule_info=schedule_rows,
                            assignment_info=assignment_info,
                            customer_list=customer_list,
-                           flight_list=flight_list)
+                           flight_list=flight_list,
+                           stats= stats)
+
+
+# @app.route('/loai_may_bay_stats')
+# def loai_may_bay_stats():
+#     cursor.execute("SELECT HangSanXuat, COUNT(*) FROM LoaiMayBay GROUP BY HangSanXuat")
+#     stats = cursor.fetchall()
+#     return jsonify({
+#         'labels': [s[0] for s in stats],
+#         'data': [s[1] for s in stats]
+#     })
+
+# @app.route('/top_chuyen_bay')
+# def top_chuyen_bay():
+#     query = """
+#     SELECT TOP 5 ChuyenBay.MaChuyenBay, ChuyenBay.TenSanBayDi, ChuyenBay.TenSanBayDen, COUNT(DatCho.MaKH) as total_bookings
+#     FROM ChuyenBay 
+#     JOIN LichBay ON LichBay.MaChuyenBay = ChuyenBay.MaChuyenBay
+#     JOIN DatCho ON DatCho.MaChuyenBay = LichBay.MaChuyenBay AND DatCho.NgayDi = LichBay.NgayDi
+#     GROUP BY ChuyenBay.MaChuyenBay, ChuyenBay.TenSanBayDi, ChuyenBay.TenSanBayDen
+#     ORDER BY total_bookings DESC
+#     """
+#     cursor.execute(query)
+#     top_flights = cursor.fetchall()
+#     return jsonify({
+#         'labels': [f"{f[0]} ({f[1]} -> {f[2]})" for f in top_flights],
+#         'data': [f[3] for f in top_flights]
+#     })
+
+# @app.route('/nhan_vien_theo_loai')
+# def nhan_vien_theo_loai():
+#     cursor.execute("SELECT LoaiNV, COUNT(*) FROM NhanVien GROUP BY LoaiNV")
+#     stats = cursor.fetchall()
+#     return jsonify({
+#         'labels': [s[0] for s in stats],
+#         'data': [s[1] for s in stats]
+#     })
 
 ### Các hàm xử lý cho quản lý CHUYẾN BAY
 
