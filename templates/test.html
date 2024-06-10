@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<style>
+    body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login input[type="text"],
+        .login input[type="password"],
+        .login button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .login button {
+            background-color: #4c54af;
+            color: white;
+            cursor: pointer;
+        }
+
+        .login button:hover {
+            background-color: #4c54af;
+        }
+
+        .login p {
+            margin: 8px 0;
+            color: red;
+            font-size: 14px;
+        }
+    
+
+   
+       
+       
+</style>
+</head>
+    
+    <div class="login">
+        <h2>Login</h2>
+        <input type="text" id="email" placeholder="email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="error" style="color:red;"></p>
+    </div>
+<script>
+   const ListAccount = [
+    {
+        email:"1",
+        password:"1"
+    },
+    {
+        email:"linh124@gmail",
+        password:"124"
+    },
+    {
+        email:"yen223@gmail",
+        password:"223"
+    },
+    {
+        email:"yen234@gmail",
+        password:"234"
+    },
+    {
+        email:"dang345@gmail",
+        password:"345"
+    },
+    {
+        email:"dang346@gmail",
+        password:"346"
+    },
+    {
+        email:"cao456@gmail",
+        password:"456"
+    },
+    {
+        email:"cao467@gmail",
+        password:"467"
+    },
+    {
+        email:"hieu567@gmail",
+        password:"567"
+    },
+    {
+        email:"hieu578@gmail",
+        password:"578"
+    },
+    {
+        email:"lien678@gmail",
+        password:"678"
+    },
+    {
+        email:"lien689@gmail",
+        password:"689"
+    }
+   ]
+   function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    // Tìm kiếm tài khoản trong danh sách ListAccount
+    const account = ListAccount.find(a => a.email === email && a.password === password);
+
+    if (account) {
+        // Nếu tìm thấy tài khoản, lưu trạng thái đăng nhập và chuyển hướng
+        localStorage.setItem('loggedIn', 'true');
+        window.location.href = 'index.html';
+    } else {
+        // Ngược lại, hiển thị thông báo lỗi
+        document.getElementById('error').textContent = 'Invalid username or password';
+    }
+}
+</script>
+</body>
+</html>

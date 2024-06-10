@@ -113,6 +113,15 @@ header::after { right: 10%; animation-delay: 5s; }
     100% { transform: translateY(100vh) rotate(360deg); }
 }
 
+#username {
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  #username:hover {
+    text-decoration: underline;
+  }
+
 /* Định dạng cho thanh điều hướng */
 nav {
     margin: 20px 0;

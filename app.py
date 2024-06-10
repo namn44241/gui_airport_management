@@ -79,12 +79,13 @@ def auth():
 
     if result:
         user_name = result[0]
-        session['username'] = user_name  # Lưu username vào session
-        return redirect(url_for('admin'))
+        session['username'] = user_name  
+        return redirect(url_for('admin', username=user_name))
     else:
         error_msg = "Tài khoản hoặc mật khẩu không đúng"
         return render_template_string("<script>alert('{}'); window.location.href = '/';</script>".format(error_msg))
     
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)  # Xóa username khỏi session
@@ -94,7 +95,7 @@ def logout():
 def admin():
     if 'username' not in session:
         return redirect(url_for('login'))
-
+    
     username = request.args.get('username')
 
     # Hiển thị nút đăng xuất
