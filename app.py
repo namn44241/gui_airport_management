@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, render_template_string, jsonify
+from flask import Flask, render_template, request, redirect, url_for, render_template_string, jsonify, session
 import pyodbc
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 app.static_folder = 'static' 
+app.secret_key = os.urandom(24)
 
 # Thông tin kết nối
 dsn = 'QuanLiSanBay'
@@ -21,7 +23,92 @@ def test_connection():
         return f"Kết nối thất bại: {str(e)}"
     
 @app.route('/')
-def index():
+def login():
+    if 'username' in session:
+        return redirect(url_for('admin'))  # Chuyển hướng nếu đã đăng nhập
+    
+    # Hiển thị form đăng nhập nếu chưa đăng nhập
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Đăng nhập</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body onload="showLoginDialog()">
+        <script>
+            function showLoginDialog() {
+                Swal.fire({
+                    title: 'Đăng nhập',
+                    html: `
+                        <input id="username" class="swal2-input" placeholder="Tài khoản">
+                        <input id="password" type="password" class="swal2-input" placeholder="Mật khẩu">
+                    `,
+                    confirmButtonText: 'Đăng nhập',
+                    preConfirm: () => {
+                        const username = document.getElementById('username').value;
+                        const password = document.getElementById('password').value;
+                        if (!username || !password) {
+                            Swal.showValidationMessage('Vui lòng nhập tài khoản và mật khẩu.');
+                        }
+                        return { username, password };
+                    },
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const { username, password } = result.value;
+                        window.location.href = `/auth?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+                    }
+                });
+            }
+        </script>
+    </body>
+    </html>
+    """
+    return render_template_string(html)
+
+    
+@app.route('/auth')
+def auth():
+    username = request.args.get('username')
+    password = request.args.get('password')
+    
+    query = "SELECT UserName FROM Admins WHERE UserName = ? AND PasswordHash = dbo.HashPassword(?)"
+    cursor.execute(query, (username, password))
+    result = cursor.fetchone()
+
+    if result:
+        user_name = result[0]
+        session['username'] = user_name  # Lưu username vào session
+        return redirect(url_for('admin'))
+    else:
+        error_msg = "Tài khoản hoặc mật khẩu không đúng"
+        return render_template_string("<script>alert('{}'); window.location.href = '/';</script>".format(error_msg))
+    
+@app.route('/logout')
+def logout():
+    session.pop('username', None)  # Xóa username khỏi session
+    return redirect(url_for('login'))
+
+@app.route('/admin')
+def admin():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    username = request.args.get('username')
+
+    # Hiển thị nút đăng xuất
+    html = f"""
+    <h2>Xin chào {username}</h2>
+    <a href="{url_for('logout')}">Đăng xuất</a>
+    <script>
+        var confirmLogout = confirm("Bạn có muốn đăng xuất?");
+        if (confirmLogout) {{
+            window.location.href = "{url_for('logout')}";
+        }}
+    </script>
+    """
+
     flight_info = []
     plane_info = []
     booking_info = []
@@ -118,6 +205,7 @@ def index():
     }
 
     return render_template('index.html',
+                           username=username,
                            flight_info=flight_info,
                            plane_info=plane_info,
                            booking_info=booking_info,
@@ -130,43 +218,6 @@ def index():
                            flight_list=flight_list,
                            stats= stats)
 
-
-# @app.route('/loai_may_bay_stats')
-# def loai_may_bay_stats():
-#     cursor.execute("SELECT HangSanXuat, COUNT(*) FROM LoaiMayBay GROUP BY HangSanXuat")
-#     stats = cursor.fetchall()
-#     return jsonify({
-#         'labels': [s[0] for s in stats],
-#         'data': [s[1] for s in stats]
-#     })
-
-# @app.route('/top_chuyen_bay')
-# def top_chuyen_bay():
-#     query = """
-#     SELECT TOP 5 ChuyenBay.MaChuyenBay, ChuyenBay.TenSanBayDi, ChuyenBay.TenSanBayDen, COUNT(DatCho.MaKH) as total_bookings
-#     FROM ChuyenBay 
-#     JOIN LichBay ON LichBay.MaChuyenBay = ChuyenBay.MaChuyenBay
-#     JOIN DatCho ON DatCho.MaChuyenBay = LichBay.MaChuyenBay AND DatCho.NgayDi = LichBay.NgayDi
-#     GROUP BY ChuyenBay.MaChuyenBay, ChuyenBay.TenSanBayDi, ChuyenBay.TenSanBayDen
-#     ORDER BY total_bookings DESC
-#     """
-#     cursor.execute(query)
-#     top_flights = cursor.fetchall()
-#     return jsonify({
-#         'labels': [f"{f[0]} ({f[1]} -> {f[2]})" for f in top_flights],
-#         'data': [f[3] for f in top_flights]
-#     })
-
-# @app.route('/nhan_vien_theo_loai')
-# def nhan_vien_theo_loai():
-#     cursor.execute("SELECT LoaiNV, COUNT(*) FROM NhanVien GROUP BY LoaiNV")
-#     stats = cursor.fetchall()
-#     return jsonify({
-#         'labels': [s[0] for s in stats],
-#         'data': [s[1] for s in stats]
-#     })
-
-### Các hàm xử lý cho quản lý CHUYẾN BAY
 
 @app.route('/them_cb', methods=['POST'])
 def them_cb():
