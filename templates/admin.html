@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUẢN LÍ SÂN BAY</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/wings_logo.png') }}" alt="logo" id="logo">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -46,7 +47,7 @@
         <ul>
           <li><a href="#customer-info">Khách hàng</a></li>
           <li><a href="#employee-info">Nhân viên</a></li>
-          <li><a href="#airport-info">Sân bay</a></li>
+          <li><a href="#airport-info">Loại máy bay</a></li>
           <li><a href="#aircraft-info">Máy bay</a></li>
           <li><a href="#flight-info">Chuyến bay</a></li>
           <li><a href="#schedule-info">Lịch bay</a></li>
@@ -229,12 +230,12 @@
           
             <!-- Form để sửa chuyến bay -->
             <form method="POST" action="{{ url_for('sua_cb') }}">
-              <label for="edit-flight-id">Mã chuyến bay:</label>
-              <input type="text" id="edit-flight-id" name="flight-id" required><br>
+              <label for="edit-flight-id">Mã chuyến bay*:</label>
+              <input type="text" id="edit-flight-id" name="flight-id" placeholder="Nhập Mã chuyến bay muốn sửa" required><br>
               <label for="edit-departure-airport">Sân bay đi:</label>
-              <input type="text" id="edit-departure-airport" name="departure-airport"><br>
+              <input type="text" id="edit-departure-airport" name="departure-airport" placeholder="Nhập Sân bay đi"><br>
               <label for="edit-arrival-airport">Sân bay đến:</label>
-              <input type="text" id="edit-arrival-airport" name="arrival-airport"><br>
+              <input type="text" id="edit-arrival-airport" name="arrival-airport" placeholder="Nhập Sân bay đến"><br>
               <label for="edit-departure-time">Giờ đi:</label>
               <input type="datetime-local" id="edit-departure-time" name="departure-time" required><br>
               <label for="edit-arrival-time">Giờ đến:</label>
@@ -278,7 +279,7 @@
             <!-- Form để thêm loại máy bay mới -->
             <form method="POST" action="{{ url_for('them_loai_mb') }}">
                 <label for="plane-type-id">Mã loại:</label>
-                <input type="text" id="plane-type-id" name="plane-type-id" required><br>
+                <input type="text" id="plane-type-id" name="plane-type-id" value="{{ next_plane_type_id }}" readonly><br>
                 <label for="manufacturer">Hãng sản xuất:</label>
                 <input type="text" id="manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
                 <button type="submit">Thêm thông tin Loại máy bay</button>
@@ -287,7 +288,7 @@
             <!-- Form để sửa thông tin loại máy bay -->
             <form method="POST" action="{{ url_for('sua_loai_mb') }}">
                 <label for="edit-plane-type-id">Mã loại:</label>
-                <input type="text" id="edit-plane-type-id" name="plane-type-id" required><br>
+                <input type="text" id="edit-plane-type-id" name="plane-type-id" placeholder="Nhập mã loại cần sửa!" required><br>
                 <label for="edit-manufacturer">Hãng sản xuất:</label>
                 <input type="text" id="edit-manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
                 <button type="submit">Lưu thay đổi</button>
@@ -345,7 +346,7 @@
             <!-- Form để thêm thông tin đặt chỗ mới -->
             <form method="POST" action="{{ url_for('them_dat_cho') }}">
               <label for="customer-id">Mã khách hàng:</label>
-              <input type="text" id="customer-id" name="customer-id" required>
+              <input type="text" required pattern="^KH.*$" id="customer-id" name="customer-id" required>
               <br>
 
               <label for="flight-id">Mã chuyến bay:</label>
@@ -363,7 +364,7 @@
             <h3>hi</h3>
             <form method="POST" action="{{ url_for('sua_dat_cho') }}">
               <label for="customer-id">Mã khách hàng:</label>
-              <input type="text" id="customer-id" name="customer-id" required>
+              <input type="text" required pattern="^KH.*$" id="customer-id" name="customer-id" required>
               <br>
               <label for="flight-id">Mã chuyến bay:</label>
               <input type="text" id="flight-id" name="flight-id" required onchange="updateFlightDates(this.value)">
@@ -483,9 +484,9 @@
             <h2>Quản lý thông tin khách hàng</h2>
             <form method="POST" action="{{ url_for('them_kh') }}">
               <label for="customer-id">Mã khách hàng:</label>
-              <input type="text" id="customer-id" name="customer-id" required><br>
+              <input type="text" required pattern="^KH.*$" id="customer-id" name="customer-id" value="{{ next_customer_id }}" readonly><br>
               <label for="customer-phone">Số điện thoại:</label>
-              <input type="text" id="customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
+              <input type="text" pattern="[0-9]{10}" id="customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
               <label for="customer-last-name">Họ đệm:</label>
               <input type="text" id="customer-last-name" name="customer-last-name" placeholder="Nhập họ đệm"><br>
               <label for="customer-first-name">Tên:</label>
@@ -495,10 +496,10 @@
               <button type="submit">Thêm thông tin khách hàng</button>
             </form>
             <form method="POST" action="{{ url_for('sua_kh') }}">
-                <label for="edit-customer-id">Mã khách hàng:</label>
-                <input type="text" id="edit-customer-id" name="customer-id" required><br>
+                <label for="edit-customer-id">Mã khách hàng*:</label>
+                <input type="text" required pattern="^KH.*$" id="edit-customer-id" name="customer-id" placeholder="Nhập mã khách hàng cần sửa!" required><br>
                 <label for="edit-customer-phone">Số điện thoại:</label>
-                <input type="text" id="edit-customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
+                <input type="text" pattern="[0-9]{10}" id="edit-customer-phone" name="customer-phone" placeholder="Nhập số điện thoại"><br>
                 <label for="edit-customer-last-name">Họ đệm:</label>
                 <input type="text" id="edit-customer-last-name" name="customer-last-name" placeholder="Nhập họ đệm"><br>
                 <label for="edit-customer-first-name">Tên:</label>
@@ -541,13 +542,13 @@
             <h2>Quản lý thông tin nhân viên</h2>
             <form method="POST" action="{{ url_for('them_nv') }}">
               <label for="employee-id">Mã nhân viên:</label>
-              <input type="text" id="employee-id" name="employee-id" required><br>
+              <input type="text" required pattern="^NV.*$" id="employee-id" name="employee-id" value="{{ next_employee_id}}" readonly><br>
               <label for="employee-last-name">Họ đệm:</label>
               <input type="text" id="employee-last-name" name="employee-last-name" placeholder="Nhập họ đệm"><br>
               <label for="employee-first-name">Tên:</label>
               <input type="text" id="employee-first-name" name="employee-first-name" placeholder="Nhập tên"><br>
               <label for="employee-phone">Số điện thoại:</label>
-              <input type="text" id="employee-phone" name="employee-phone" placeholder="Nhập số điện thoại"><br>
+              <input type="text" pattern="[0-9]{10}" id="employee-phone" name="employee-phone" placeholder="Nhập số điện thoại"><br>
               <label for="employee-address">Địa chỉ:</label>
               <input type="text" id="employee-address" name="employee-address" placeholder="Nhập địa chỉ"><br>
               <label for="employee-salary">Lương:</label>
@@ -674,7 +675,7 @@
           <h2>Quản lý phân công</h2>
           <form method="POST" action="{{ url_for('them_phan_cong') }}">
               <label for="customer-id">Mã khách hàng:</label>
-              <select id="customer-id" name="customer-id" required>
+              <select id="customer-id" required pattern="^KH.*$" name="customer-id" required>
                   {% for customer in customer_info %}
                       <option value="{{ customer.MaKH }}">{{ customer.MaKH }} - {{ customer.HoDem }} {{ customer.Ten }}</option>
                   {% endfor %}
@@ -693,7 +694,7 @@
 
           <form method="POST" action="{{ url_for('sua_phan_cong', customer_id=assignment_info.MaKH, departure_date=assignment_info.NgayDi, flight_id=assignment_info.MaChuyenBay) }}">
             <label for="new-customer-id">Mã khách hàng:</label>
-            <select id="new-customer-id" name="new-customer-id" required>
+            <select id="new-customer-id" required pattern="^KH.*$" name="new-customer-id" required>
                 {% for customer in customer_info %}
                     <option value="{{ customer.MaKH }}" {% if customer.MaKH == assignment_info.MaKH %}selected{% endif %}>{{ customer.MaKH }} - {{ customer.HoDem }} {{ customer.Ten }}</option>
                 {% endfor %}

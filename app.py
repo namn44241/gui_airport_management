@@ -88,7 +88,7 @@ def auth():
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)  # Xóa username khỏi session
+    session.pop('username', None)
     return redirect(url_for('login'))
 
 @app.route('/admin')
@@ -96,7 +96,7 @@ def admin():
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    username = request.args.get('username')
+    username = session.get('username')
 
     # Hiển thị nút đăng xuất
     html = f"""
@@ -131,6 +131,18 @@ def admin():
     cursor.execute(query)
     aircraft_info = [dict(MaLoai=row[0], HangSanXuat=row[1]) for row in cursor.fetchall()]
 
+    query = "SELECT MAX (MaLoai) FROM LoaiMayBay"
+    cursor.execute(query)
+    max_plane_type_id = cursor.fetchone()[0]
+
+    if max_plane_type_id:
+         # Chuyển đổi max_plane_type_id thành chuỗi
+        max_plane_type_id_str = str(max_plane_type_id)
+        next_id_num = int(max_plane_type_id_str) + 1
+        next_plane_type_id = f"{next_id_num:02d}"
+    else:
+        next_plane_type_id = "01"
+
     # Lấy danh sách thông tin đặt chỗ từ cơ sở dữ liệu
     query = "SELECT KhachHang.MaKH, NgayDi, ChuyenBay.MaChuyenBay FROM DatCho JOIN KhachHang ON DatCho.MaKH = KhachHang.MaKH JOIN ChuyenBay ON DatCho.MaChuyenBay = ChuyenBay.MaChuyenBay"
     cursor.execute(query)
@@ -141,6 +153,18 @@ def admin():
     cursor.execute(query)
     customer_info = [row for row in cursor.fetchall()]
 
+    query = "SELECT MAX(MaKH) FROM KhachHang"
+    cursor.execute(query)
+    max_customer_id = cursor.fetchone()[0]
+
+    if max_customer_id:
+        # Lấy phần số từ ký tự thứ 3 của max_customer_id
+        max_id_num = int(max_customer_id[2:])
+        next_id_num = max_id_num + 1
+        next_customer_id = f"KH{next_id_num:06d}"
+    else:
+        next_customer_id = "KH000001"
+
     # Lấy danh sách máy bay từ cơ sở dữ liệu
     query = "SELECT SoHieu, MayBay.MaLoai, SoGheNgoi FROM MayBay JOIN LoaiMayBay ON MayBay.MaLoai = LoaiMayBay.MaLoai"
     cursor.execute(query)
@@ -150,6 +174,17 @@ def admin():
     query = "SELECT MaNV, HoDem, Ten, SDT, DiaChi, Luong, LoaiNV FROM NhanVien"
     cursor.execute(query)
     employee_info = [row for row in cursor.fetchall()]
+
+    query = "SELECT MAX(MaNV) FROM NhanVien"
+    cursor.execute(query)
+    max_employee_id = cursor.fetchone()[0]
+
+    if max_employee_id:
+        max_id_num = int(max_employee_id[2:])
+        next_id_num = max_id_num + 1
+        next_employee_id = f"NV{next_id_num:06d}"
+    else:
+        next_employee_id = "NV000001"
 
     # Lấy thông tin lịch bay từ cơ sở dữ liệu
     query = "SELECT * FROM LichBay"
@@ -205,7 +240,7 @@ def admin():
         'data': [s[1] for s in nhan_vien_stats]
     }
 
-    return render_template('index.html',
+    return render_template('admin.html',
                            username=username,
                            flight_info=flight_info,
                            plane_info=plane_info,
@@ -217,6 +252,9 @@ def admin():
                            assignment_info=assignment_info,
                            customer_list=customer_list,
                            flight_list=flight_list,
+                           next_customer_id=next_customer_id,
+                           next_employee_id=next_employee_id,
+                           next_plane_type_id=next_plane_type_id,
                            stats= stats)
 
 
@@ -232,7 +270,7 @@ def them_cb():
     values = (flight_id, departure_airport, arrival_airport, departure_time, arrival_time)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_cb', methods=['POST'])
 def sua_cb():
@@ -245,14 +283,14 @@ def sua_cb():
     values = (departure_airport, arrival_airport, departure_time, arrival_time, flight_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/xoa_cb/<flight_id>', methods=['POST'])
 def xoa_cb(flight_id):
     query = "DELETE FROM ChuyenBay WHERE MaChuyenBay = ?"
     cursor.execute(query, (flight_id,))
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 ### Các hàm xử lý cho quản lý LOẠI MÁY BAY
 
@@ -264,7 +302,7 @@ def them_loai_mb():
     values = (plane_type_id, manufacturer)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index', section='aircraft-types'))
+    return redirect(url_for('admin', section='aircraft-types'))
 
 @app.route('/sua_loai_mb', methods=['POST'])
 def sua_loai_mb():
@@ -274,14 +312,14 @@ def sua_loai_mb():
     values = (manufacturer, plane_type_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index', section='aircraft-types'))
+    return redirect(url_for('admin', section='aircraft-types'))
 
 @app.route('/xoa_loai_mb/<plane_type_id>', methods=['POST'])
 def xoa_loai_mb(plane_type_id):
     query = "DELETE FROM LoaiMayBay WHERE MaLoai = ?"
     cursor.execute(query, (plane_type_id,))
     cnxn.commit()
-    return redirect(url_for('index', section='aircraft-types'))
+    return redirect(url_for('admin', section='aircraft-types'))
 
 
 ### Các hàm xử lý cho quản lý ĐẶT CHỖ
@@ -338,17 +376,17 @@ def them_dat_cho():
     # Kiểm tra xem MaKH có tồn tại trong bảng KhachHang hay không
     if not check_customer_exists(customer_id):
         error_message = "Mã khách hàng không hợp lệ. Vui lòng nhập lại."
-        return render_template('index.html', error_message=error_message)
+        return render_template('admin.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng ChuyenBay hay không
     if not check_flight_exists(flight_id):
         error_message = "Mã chuyến bay không hợp lệ. Vui lòng nhập lại."
-        return render_template('index.html', error_message=error_message)
+        return render_template('admin.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng LichBay hay không với NgayDi
     if not check_flight_schedule_exists(flight_id, departure_date):
         error_message = "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn. Vui lòng nhập lại."
-        return render_template('index.html', error_message=error_message)
+        return render_template('admin.html', error_message=error_message)
 
     # Chuyển đổi departure_date thành đối tượng date
     departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
@@ -358,7 +396,7 @@ def them_dat_cho():
     values = (customer_id, departure_date, flight_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_dat_cho', methods=['POST'])
 def sua_dat_cho():
@@ -372,17 +410,17 @@ def sua_dat_cho():
     # Kiểm tra xem MaKH có tồn tại trong bảng KhachHang hay không
     if not check_customer_exists(customer_id):
         error_message = "Mã khách hàng không hợp lệ. Vui lòng nhập lại."
-        return render_template('index.html', error_message=error_message)
+        return render_template('admin.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng ChuyenBay hay không
     if not check_flight_exists(flight_id):
         error_message = "Mã chuyến bay không hợp lệ. Vui lòng nhập lại."
-        return render_template('index.html', error_message=error_message)
+        return render_template('admin.html', error_message=error_message)
 
     # Kiểm tra xem MaChuyenBay có tồn tại trong bảng LichBay hay không với NgayDi
     if not check_flight_schedule_exists(flight_id, departure_date):
         error_message = "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn. Vui lòng nhập lại."
-        return render_template('index.html', error_message=error_message)
+        return render_template('admin.html', error_message=error_message)
 
     # Chuyển đổi departure_date thành đối tượng date
     departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
@@ -392,7 +430,7 @@ def sua_dat_cho():
     values = (flight_id, departure_date, customer_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/xoa_dat_cho/<customer_id>/<departure_date>/<flight_id>', methods=['POST'])
 def xoa_dat_cho(customer_id, departure_date, flight_id):
@@ -402,7 +440,7 @@ def xoa_dat_cho(customer_id, departure_date, flight_id):
     cursor.execute(query, values)
     cnxn.commit()
 
-    return redirect(url_for('index')) 
+    return redirect(url_for('admin')) 
 
 ### Các hàm xử lý cho quản lý MÁY BAY
 
@@ -416,7 +454,7 @@ def them_mb():
     values = (plane_id, plane_type_id, seat_quantity)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_mb', methods=['POST'])
 def sua_mb():
@@ -428,14 +466,14 @@ def sua_mb():
     values = (plane_type_id, seat_quantity, plane_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/xoa_mb/<plane_id>', methods=['POST'])
 def xoa_mb(plane_id):
     query = "DELETE FROM MayBay WHERE SoHieu = ?"
     cursor.execute(query, (plane_id,))
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 ### Các hàm xử lý cho quản lý KHÁCH HÀNG
 
@@ -450,7 +488,7 @@ def them_kh():
     values = (customer_id, customer_phone, customer_last_name, customer_first_name, customer_address)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_kh', methods=['POST'])
 def sua_kh():
@@ -463,14 +501,14 @@ def sua_kh():
     values = (customer_phone, customer_last_name, customer_first_name, customer_address, customer_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/xoa_kh/<customer_id>', methods=['POST'])
 def xoa_kh(customer_id):
     query = "DELETE FROM KhachHang WHERE MaKH = ?"
     cursor.execute(query, (customer_id,))
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 ### Các hàm xử lý cho quản lý NHÂN VIÊN
 
@@ -489,7 +527,7 @@ def them_nv():
     values = (employee_id, employee_last_name, employee_first_name, employee_phone, employee_address, employee_salary, employee_type)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_nv/<employee_id>', methods=['POST'])
 def sua_nv(employee_id):
@@ -504,14 +542,14 @@ def sua_nv(employee_id):
     values = (employee_last_name, employee_first_name, employee_phone, employee_address, employee_salary, employee_type, employee_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/xoa_nv/<employee_id>', methods=['POST'])
 def xoa_nv(employee_id):
     query = "DELETE FROM NhanVien WHERE MaNV = ?"
     cursor.execute(query, (employee_id,))
     cnxn.commit()
-    return redirect(url_for('index')) 
+    return redirect(url_for('admin')) 
 
 
 ### Các hàm xử lý cho quản lý LỊCH BAY
@@ -528,7 +566,7 @@ def them_lich():
     values = (departure_date, flight_id, aircraft_id, aircraft_type_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_lich', methods=['POST'])
 def sua_lich():
@@ -542,7 +580,7 @@ def sua_lich():
     values = (flight_id, aircraft_id, aircraft_type_id, departure_date, schedule_id)
     cursor.execute(query, values)
     cnxn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/xoa_lich', methods=['POST'])
 def xoa_lich():
@@ -553,7 +591,7 @@ def xoa_lich():
        values = (departure_date, flight_id, aircraft_id)
        cursor.execute(query, values)
        cnxn.commit()
-       return redirect(url_for('index'))
+       return redirect(url_for('admin'))
 
 
 ### Các hàm xử lý cho quản lý PHÂN CÔNG
@@ -572,7 +610,7 @@ def them_phan_cong():
     cursor.execute(query, values)  # Cung cấp đầy đủ 3 tham số
     conn.commit()
 
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 @app.route('/sua_phan_cong/<customer_id>/<departure_date>/<flight_id>', methods=['GET', 'POST'])
 def sua_phan_cong(customer_id, departure_date, flight_id):
@@ -599,14 +637,14 @@ def sua_phan_cong(customer_id, departure_date, flight_id):
              values = (new_customer_id, new_departure_date, new_flight_id, customer_id, departure_date, flight_id)
              cursor.execute(query, values)
              conn.commit()
-             return redirect(url_for('index')) 
+             return redirect(url_for('admin')) 
 
 @app.route('/xoa_phan_cong/<customer_id>/<departure_date>/<flight_id>', methods=['POST'])
 def xoa_phan_cong(customer_id, departure_date, flight_id):
     query = "DELETE FROM DatCho WHERE MaKH = ? AND NgayDi = ? AND MaChuyenBay = ?"
     cursor.execute(query, (customer_id, departure_date, flight_id))
     conn.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('admin'))
 
 
 if __name__ == '__main__':
