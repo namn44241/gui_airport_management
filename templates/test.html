@@ -1,146 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+<html>
+<title>Pictures Slideshow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <style>
-    body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .login {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .login h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .login input[type="text"],
-        .login input[type="password"],
-        .login button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .login button {
-            background-color: #4c54af;
-            color: white;
-            cursor: pointer;
-        }
-
-        .login button:hover {
-            background-color: #4c54af;
-        }
-
-        .login p {
-            margin: 8px 0;
-            color: red;
-            font-size: 14px;
-        }
-    
-
-   
-       
-       
+.mySlides {display:none;}
 </style>
-</head>
-    
-    <div class="login">
-        <h2>Login</h2>
-        <input type="text" id="email" placeholder="email">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-        <p id="error" style="color:red;"></p>
+<body>
+
+<h2 class="w3-center">Index 3: Manual Slideshow</h2>
+
+<div class="w3-content w3-display-container">
+  <img class="mySlides" src="https://cdnphoto.dantri.com.vn/CCUrAKWsF58K153gp9G4x27ZFEw=/2024/05/11/anh-1-pc-1715442989949.jpg" style="width:100%">
+  <img class="mySlides" src="https://cdnphoto.dantri.com.vn/aj9eN5hNeJDRaO_zPTrUM9FieQM=/2024/05/11/anh-2-pc-1715443071800.jpg" style="width:100%">
+  <img class="mySlides" src="https://cdnphoto.dantri.com.vn/2CL9TeSDSqyOTil9Z5Hpz4y5nOA=/2024/05/11/anh-3-pc-1715443184163.jpg" style="width:100%">
+
+  <button class="w3-button w3-black w3-display-left" onclick="plusDivs(-1)">&#10094;</button>
+  <button class="w3-button w3-black w3-display-right" onclick="plusDivs(1)">&#10095;</button>
+
+  <div class="w3-row-padding w3-section">
+    <div class="w3-col s4">
+      <img class="demo w3-opacity" src="https://cdnphoto.dantri.com.vn/CCUrAKWsF58K153gp9G4x27ZFEw=/2024/05/11/anh-1-pc-1715442989949.jpg"
+      style="width:100%" onclick="currentDiv(1)">
     </div>
+    <div class="w3-col s4">
+      <img class="demo w3-opacity" src="https://cdnphoto.dantri.com.vn/aj9eN5hNeJDRaO_zPTrUM9FieQM=/2024/05/11/anh-2-pc-1715443071800.jpg"
+      style="width:100%" onclick="currentDiv(2)">
+    </div>
+    <div class="w3-col s4">
+      <img class="demo w3-opacity" src="https://cdnphoto.dantri.com.vn/2CL9TeSDSqyOTil9Z5Hpz4y5nOA=/2024/05/11/anh-3-pc-1715443184163.jpg"
+      style="width:100%" onclick="currentDiv(3)">
+    </div>
+  </div>
+</div>
+
 <script>
-   const ListAccount = [
-    {
-        email:"1",
-        password:"1"
-    },
-    {
-        email:"linh124@gmail",
-        password:"124"
-    },
-    {
-        email:"yen223@gmail",
-        password:"223"
-    },
-    {
-        email:"yen234@gmail",
-        password:"234"
-    },
-    {
-        email:"dang345@gmail",
-        password:"345"
-    },
-    {
-        email:"dang346@gmail",
-        password:"346"
-    },
-    {
-        email:"cao456@gmail",
-        password:"456"
-    },
-    {
-        email:"cao467@gmail",
-        password:"467"
-    },
-    {
-        email:"hieu567@gmail",
-        password:"567"
-    },
-    {
-        email:"hieu578@gmail",
-        password:"578"
-    },
-    {
-        email:"lien678@gmail",
-        password:"678"
-    },
-    {
-        email:"lien689@gmail",
-        password:"689"
-    }
-   ]
-   function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    var slideIndex = 1;
+    showDivs(slideIndex);
 
-    // Tìm kiếm tài khoản trong danh sách ListAccount
-    const account = ListAccount.find(a => a.email === email && a.password === password);
-
-    if (account) {
-        // Nếu tìm thấy tài khoản, lưu trạng thái đăng nhập và chuyển hướng
-        localStorage.setItem('loggedIn', 'true');
-        window.location.href = 'index.html';
-    } else {
-        // Ngược lại, hiển thị thông báo lỗi
-        document.getElementById('error').textContent = 'Invalid username or password';
+    function plusDivs(n) {
+    showDivs(slideIndex += n);
     }
-}
+
+    function currentDiv(n) {
+    showDivs(slideIndex = n);
+    }
+
+    function showDivs(n) {
+    var i;
+    var slides = document.getElementsByClassName("mySlides");
+    var dots = document.getElementsByClassName("demo");
+    if (n > slides.length) {slideIndex = 1}
+    if (n < 1) {slideIndex = slides.length}
+    for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";  
+    }
+    for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" w3-opacity-off", "");
+    }
+    slides[slideIndex-1].style.display = "block";  
+    dots[slideIndex-1].className += " w3-opacity-off";
+    }
+</script>
+<script>
+    var slideIndex = 0;
+    carousel();
+
+    function carousel() {
+    var i;
+    var x = document.getElementsByClassName("mySlides");
+    for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
+    }
+    slideIndex++;
+    if (slideIndex > x.length) {slideIndex = 1}
+    x[slideIndex-1].style.display = "block";
+    setTimeout(carousel, 5000); 
+    }
 </script>
 </body>
 </html>

@@ -126,6 +126,17 @@ def admin():
     cursor.execute(query)
     flight_info = [row for row in cursor.fetchall()]
 
+    query = "SELECT MAX(MaChuyenBay) FROM ChuyenBay"
+    cursor.execute(query)
+    max_flight_id = cursor.fetchone()[0]
+
+    if max_flight_id:
+        max_id_num = int(max_flight_id[2:])
+        next_id_num = max_id_num + 1
+        next_flight_id = f"CB{next_id_num:06d}"
+    else:
+        next_flight_id = "CB000001"
+
     # Lấy danh sách loại máy bay từ cơ sở dữ liệu
     query = "SELECT MaLoai, HangSanXuat FROM LoaiMayBay"
     cursor.execute(query)
@@ -255,6 +266,7 @@ def admin():
                            next_customer_id=next_customer_id,
                            next_employee_id=next_employee_id,
                            next_plane_type_id=next_plane_type_id,
+                           next_flight_id=next_flight_id,
                            stats= stats)
 
 
