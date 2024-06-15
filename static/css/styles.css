@@ -288,6 +288,9 @@ form label {
 }
 
 form input[type="text"],
+.customer-id,
+.flight-id,
+.departure-date,
 form input[type="datetime-local"] {
     width: 100%;
     padding: 10px;

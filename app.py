@@ -121,6 +121,7 @@ def admin():
     customer_list = []
     flight_list = []
 
+
     # Lấy danh sách chuyến bay từ cơ sở dữ liệu
     query = "SELECT MaChuyenBay, TenSanBayDi, TenSanBayDen, GioDi, GioDen FROM ChuyenBay"
     cursor.execute(query)
@@ -154,10 +155,14 @@ def admin():
     else:
         next_plane_type_id = "01"
 
-    # Lấy danh sách thông tin đặt chỗ từ cơ sở dữ liệu
-    query = "SELECT KhachHang.MaKH, NgayDi, ChuyenBay.MaChuyenBay FROM DatCho JOIN KhachHang ON DatCho.MaKH = KhachHang.MaKH JOIN ChuyenBay ON DatCho.MaChuyenBay = ChuyenBay.MaChuyenBay"
+    # Lấy danh sách thông tin đặt chỗ và thông tin chuyến bay
+    query = """
+    SELECT dc.MaKH, dc.NgayDi, cb.MaChuyenBay, cb.GioDi, cb.GioDen, cb.TenSanBayDi, cb.TenSanBayDen
+    FROM DatCho dc
+    JOIN ChuyenBay cb ON dc.MaChuyenBay = cb.MaChuyenBay
+    """
     cursor.execute(query)
-    booking_info = [row for row in cursor.fetchall()]
+    booking_info = cursor.fetchall()
 
     # Lấy thông tin đầy đủ về khách hàng từ cơ sở dữ liệu
     query = "SELECT MaKH, SDT, HoDem, Ten, DiaChi FROM KhachHang"
@@ -370,20 +375,34 @@ def check_flight_schedule_exists(flight_id, departure_date):
     return cursor.fetchone()[0] > 0
 
 
-@app.route('/get_flight_dates', methods=['GET'])
-def get_flight_dates_route():
+@app.route('/get_flight_details', methods=['GET'])
+def get_flight_details():
     flight_id = request.args.get('flight_id')
-    flight_dates = get_flight_dates(flight_id)
-    return jsonify({'flight_dates': flight_dates})
+
+    # Truy vấn SQL để lấy thông tin giờ đi và giờ đến từ bảng ChuyenBay
+    query = """
+    SELECT GioDi, GioDen
+    FROM ChuyenBay
+    WHERE MaChuyenBay = ?
+    """
+    cursor.execute(query, (flight_id,))
+    flight_info = cursor.fetchone()
+
+    if flight_info:
+        departure_time = flight_info[0].isoformat()
+        arrival_time = flight_info[1].isoformat()
+        flight_details = {
+            'departure_time': departure_time,
+            'arrival_time': arrival_time
+        }
+        return jsonify(flight_details)
+    else:
+        return jsonify({'error': 'Mã chuyến bay không hợp lệ'}), 404
 
 @app.route('/them_dat_cho', methods=['POST'])
 def them_dat_cho():
     customer_id = request.form['customer-id']
-    departure_date_str = request.form['departure-date']
     flight_id = request.form['flight-id']
-
-    # Chuyển đổi chuỗi ngày tháng thành định dạng '%Y-%m-%d'
-    departure_date = datetime.strptime(departure_date_str, '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d')
 
     # Kiểm tra xem MaKH có tồn tại trong bảng KhachHang hay không
     if not check_customer_exists(customer_id):
@@ -395,29 +414,28 @@ def them_dat_cho():
         error_message = "Mã chuyến bay không hợp lệ. Vui lòng nhập lại."
         return render_template('admin.html', error_message=error_message)
 
-    # Kiểm tra xem MaChuyenBay có tồn tại trong bảng LichBay hay không với NgayDi
-    if not check_flight_schedule_exists(flight_id, departure_date):
-        error_message = "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn. Vui lòng nhập lại."
+    # Lấy thông tin GioDi và GioDen từ bảng ChuyenBay
+    query = "SELECT GioDi, GioDen FROM ChuyenBay WHERE MaChuyenBay = ?"
+    cursor.execute(query, (flight_id,))
+    flight_info = cursor.fetchone()
+
+    if flight_info:
+        giodi, gioden = flight_info
+
+        # Thực hiện thêm thông tin đặt chỗ vào cơ sở dữ liệu
+        query = "INSERT INTO DatCho (MaKH, MaChuyenBay, GioDi, GioDen) VALUES (?, ?, ?, ?)"
+        values = (customer_id, flight_id, giodi, gioden)
+        cursor.execute(query, values)
+        cnxn.commit()
+        return redirect(url_for('admin'))
+    else:
+        error_message = "Không tìm thấy thông tin chuyến bay. Vui lòng kiểm tra lại."
         return render_template('admin.html', error_message=error_message)
-
-    # Chuyển đổi departure_date thành đối tượng date
-    departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
-
-    # Thực hiện thêm thông tin đặt chỗ vào cơ sở dữ liệu
-    query = "INSERT INTO DatCho (MaKH, NgayDi, MaChuyenBay) VALUES (?, ?, ?)"
-    values = (customer_id, departure_date, flight_id)
-    cursor.execute(query, values)
-    cnxn.commit()
-    return redirect(url_for('admin'))
 
 @app.route('/sua_dat_cho', methods=['POST'])
 def sua_dat_cho():
     customer_id = request.form['customer-id']
-    departure_date_str = request.form['departure-date']
     flight_id = request.form['flight-id']
-
-    # Chuyển đổi chuỗi ngày tháng thành định dạng '%Y-%m-%d'
-    departure_date = datetime.strptime(departure_date_str, '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d')
 
     # Kiểm tra xem MaKH có tồn tại trong bảng KhachHang hay không
     if not check_customer_exists(customer_id):
@@ -429,30 +447,36 @@ def sua_dat_cho():
         error_message = "Mã chuyến bay không hợp lệ. Vui lòng nhập lại."
         return render_template('admin.html', error_message=error_message)
 
-    # Kiểm tra xem MaChuyenBay có tồn tại trong bảng LichBay hay không với NgayDi
-    if not check_flight_schedule_exists(flight_id, departure_date):
-        error_message = "Mã chuyến bay không tồn tại trong lịch bay với ngày đi đã chọn. Vui lòng nhập lại."
+    # Lấy thông tin GioDi và GioDen từ bảng ChuyenBay
+    query = "SELECT GioDi, GioDen FROM ChuyenBay WHERE MaChuyenBay = ?"
+    cursor.execute(query, (flight_id,))
+    flight_info = cursor.fetchone()
+
+    if flight_info:
+        giodi, gioden = flight_info
+
+        query = "UPDATE DatCho SET MaChuyenBay = ?, GioDi = ?, GioDen = ? WHERE MaKH = ?"
+        values = (flight_id, giodi, gioden, customer_id)
+        cursor.execute(query, values)
+        cnxn.commit()
+        return redirect(url_for('admin'))
+    else:
+        error_message = "Không tìm thấy thông tin chuyến bay. Vui lòng kiểm tra lại."
         return render_template('admin.html', error_message=error_message)
 
-    # Chuyển đổi departure_date thành đối tượng date
-    departure_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
+@app.route('/xoa_dat_cho', methods=['POST'])
+def xoa_dat_cho():
+    customer_id = request.form['customer-id']
+    flight_id = request.form['flight-id']
+    departure_datetime = request.form['departure-datetime']
 
-    
-    query = "UPDATE DatCho SET MaChuyenBay = ?, NgayDi = ? WHERE MaKH = ?"
-    values = (flight_id, departure_date, customer_id)
-    cursor.execute(query, values)
-    cnxn.commit()
-    return redirect(url_for('admin'))
-
-@app.route('/xoa_dat_cho/<customer_id>/<departure_date>/<flight_id>', methods=['POST'])
-def xoa_dat_cho(customer_id, departure_date, flight_id):
     # Thực hiện xóa thông tin đặt chỗ từ cơ sở dữ liệu
-    query = "DELETE FROM DatCho WHERE MaKH = ? AND NgayDi = ? AND MaChuyenBay = ?"
-    values = (customer_id, departure_date, flight_id)
+    query = "DELETE FROM DatCho WHERE MaKH = ? AND MaChuyenBay = ? AND GioDi = ?"
+    values = (customer_id, flight_id, departure_datetime)
     cursor.execute(query, values)
     cnxn.commit()
 
-    return redirect(url_for('admin')) 
+    return redirect(url_for('admin'))
 
 ### Các hàm xử lý cho quản lý MÁY BAY
 

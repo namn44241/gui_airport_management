@@ -287,7 +287,7 @@
         
             <!-- Form để sửa thông tin loại máy bay -->
             <form method="POST" action="{{ url_for('sua_loai_mb') }}">
-                <label for="edit-plane-type-id">Mã loại:</label>
+                <label for="edit-plane-type-id">Mã loại*:</label>
                 <input type="text" id="edit-plane-type-id" name="plane-type-id" placeholder="Nhập mã loại cần sửa!" required><br>
                 <label for="edit-manufacturer">Hãng sản xuất:</label>
                 <input type="text" id="edit-manufacturer" name="manufacturer" placeholder="Nhập tên hãng sản xuất" required><br>
@@ -340,68 +340,121 @@
                 });
             </script>
 
-          <section id="airline-info">
-            <h2>Quản lý thông tin đặt chỗ</h2>
-          
-            <!-- Form để thêm thông tin đặt chỗ mới -->
-            <form method="POST" action="{{ url_for('them_dat_cho') }}">
-              <label for="customer-id">Mã khách hàng:</label>
-              <input type="text" required pattern="^KH.*$" id="customer-id" name="customer-id" required>
-              <br>
+        <section id="airline-info">
+          <h2>Quản lý thông tin đặt chỗ</h2>
 
-              <label for="flight-id">Mã chuyến bay:</label>
-              <input type="text" id="flight-id" name="flight-id" required onchange="updateFlightDates(this.value)">
-              <br>
+          <!-- Form để thêm thông tin đặt chỗ mới -->
+          <form method="POST" action="{{ url_for('them_dat_cho') }}">
+            <label for="customer-id">Mã khách hàng:</label>
+            <select id="customer-id" class="customer-id" name="customer-id" required>
+              <option class="customer-id" value="">-- Chọn Mã khách hàng --</option>
+                {% for customer in customer_info %}
+                  <option value="{{ customer.MaKH }}">{{ customer.MaKH }} - {{ customer.HoDem }} {{ customer.Ten }}</option>
+                {% endfor %}
+            </select>
+            <br>
 
-              <label for="departure-date">Ngày đi:</label>
-              <select id="departure-date" name="departure-date" required></select>
-              <br>
+            <label for="flight-id-create">Mã chuyến bay:</label>
+            <select id="flight-id-create" class="flight-id" name="flight-id" required onchange="updateFlightDetailsCreate(this.value)">
+              <option class="flight-id" value="">-- Chọn Mã chuyến bay --</option>
+                {% for flight in flight_info %}
+                  <option value="{{ flight.MaChuyenBay }}">{{ flight.MaChuyenBay }} - {{ flight.TenSanBayDi }} - {{ flight.TenSanBayDen }}</option>
+                {% endfor %}
+            </select>
+            <br>
 
-              <button type="submit">Thêm thông tin đặt chỗ</button>
-            </form>
+            <label for="departure-datetime-create">Giờ đi:</label>
+            <input type="datetime-local" id="departure-datetime-create" name="departure-datetime" required>
+            <br>
 
-            <!-- Form để sửa thông tin đặt chỗ -->
-            <h3>hi</h3>
-            <form method="POST" action="{{ url_for('sua_dat_cho') }}">
-              <label for="customer-id">Mã khách hàng:</label>
-              <input type="text" required pattern="^KH.*$" id="customer-id" name="customer-id" required>
-              <br>
-              <label for="flight-id">Mã chuyến bay:</label>
-              <input type="text" id="flight-id" name="flight-id" required onchange="updateFlightDates(this.value)">
-              <br>
-              <label for="departure-date">Ngày đi:</label>
-              <select id="departure-date" name="departure-date" required></select>
-              <br>
-              <button type="submit">Lưu thay đổi</button>
+            <label for="arrival-datetime-create">Giờ đến:</label>
+            <input type="datetime-local" id="arrival-datetime-create" name="arrival-datetime" required>
+            <br>
+
+            <button type="submit">Thêm thông tin đặt chỗ</button>
+          </form>
+
+          <!-- Form để sửa thông tin đặt chỗ -->
+          <form method="POST" action="{{ url_for('sua_dat_cho') }}">
+            <label for="customer-id">Mã khách hàng:</label>
+            <select id="customer-id" class="customer-id" name="customer-id" required>
+                <option class="customer-id" value="">-- Chọn Mã khách hàng --</option>
+                {% for customer in customer_info %}
+                  <option value="{{ customer.MaKH }}">{{ customer.MaKH }} - {{ customer.HoDem }} {{ customer.Ten }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+
+            <label for="flight-id-edit">Mã chuyến bay:</label> 
+            <select id="flight-id-edit" class="flight-id" name="flight-id" required onchange="updateFlightDatesEdit(this.value)">  
+              <option class="flight-id" value="">-- Chọn Mã chuyến bay --</option>
+                {% for flight in flight_info %}
+                  <option value="{{ flight.MaChuyenBay }}">{{ flight.MaChuyenBay }} - {{ flight.TenSanBayDi }} - {{ flight.TenSanBayDen }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <label for="departure-datetime-edit">Giờ đi:</label>
+            <input type="datetime-local" id="departure-datetime-edit" name="departure-datetime" required>
+            <br>
+
+            <label for="arrival-datetime-create">Giờ đến:</label>
+            <input type="datetime-local" id="arrival-datetime-edit" name="arrival-datetime" required>
+            <br>
+
+            <button type="submit">Lưu thay đổi</button>
           </form>
 
             <script>
-              function updateFlightDates(flightId) {
-                const departureDate = document.getElementById('departure-date');
-                departureDate.innerHTML = '';
+              function updateFlightDetailsCreate(flightId) {
+                const departureDateTime = document.getElementById('departure-datetime-create');
+                const arrivalDateTime = document.getElementById('arrival-datetime-create');
+
+                departureDateTime.value = '';
+                arrivalDateTime.value = '';
 
                 if (flightId) {
-                    fetch(`/get_flight_dates?flight_id=${flightId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const flightDates = data.flight_dates;
-                            const defaultOption = document.createElement('option');
-                            defaultOption.value = '';
-                            defaultOption.text = '-- Chọn ngày đi --';
-                            departureDate.add(defaultOption);
-                            flightDates.forEach(date => {
-                                const option = document.createElement('option');
-                                const formattedDate = new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                                option.value = date;
-                                option.text = formattedDate;
-                                departureDate.add(option);
-                            });
-                        })
-                        .catch(error => console.error(error));
+                  fetch(`/get_flight_details?flight_id=${flightId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                      const departureTime = data.departure_time;
+                      const arrivalTime = data.arrival_time;
+
+                      departureDateTime.value = departureTime;
+                      arrivalDateTime.value = arrivalTime;
+                    })
+                    .catch(error => console.error(error));
                 } else {
                     const defaultOption = document.createElement('option');
                     defaultOption.value = '';
-                    defaultOption.text = '-- Chọn ngày đi --';
+                    defaultOption.text = '-- Chọn giờ đi --';
+                    departureDate.add(defaultOption);
+                }
+            }
+
+            function updateFlightDatesEdit(flightId) {  
+              const departureDateTime = document.getElementById('departure-datetime-edit');
+                const arrivalDateTime = document.getElementById('arrival-datetime-edit');
+
+                departureDateTime.value = '';
+                arrivalDateTime.value = '';
+
+                if (flightId) {
+                  fetch(`/get_flight_details?flight_id=${flightId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                      const departureTime = data.departure_time;
+                      const arrivalTime = data.arrival_time;
+
+                      departureDateTime.value = departureTime;
+                      arrivalDateTime.value = arrivalTime;
+                    })
+                    .catch(error => console.error(error));
+                } else {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.text = '-- Chọn giờ đi --';
                     departureDate.add(defaultOption);
                 }
             }
@@ -412,8 +465,10 @@
               <thead>
                 <tr>
                   <th>Mã khách hàng</th>
-                  <th>Ngày đi</th>
                   <th>Mã chuyến bay</th>
+                  <th>Sân bay đi - đến</th>
+                  <th>Giờ đi</th>
+                  <th>Giờ đến</th>                
                   <th>Thao tác</th>
                 </tr>
               </thead>
@@ -421,8 +476,10 @@
                 {% for row in booking_info %}
                 <tr>
                   <td>{{ row.MaKH }}</td>
-                  <td>{{ row.NgayDi }}</td>
                   <td>{{ row.MaChuyenBay }}</td>
+                  <td>{{ row.TenSanBayDi }} -> {{ row.TenSanBayDen }}</td>
+                  <td>{{ row.GioDi.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                  <td>{{ row.GioDen.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                   <td>
                     <form method="POST" action="{{ url_for('xoa_dat_cho', customer_id=row.MaKH, departure_date=row.NgayDi, flight_id=row.MaChuyenBay) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đặt chỗ này?');">
                       <button type="submit">Xóa</button>
